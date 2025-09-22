@@ -2,6 +2,7 @@
 #include "MyGUI.h"
 #include "gm_primitives.hpp"
 #include "ReactorModel.h"
+#include "ReactorCanvas.h"
 
 
 // const int MAIN_WINDOW_WIDTH = 800;

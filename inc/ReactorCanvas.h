@@ -3,23 +3,55 @@
 
 #include "MyGUI.h"
 #include "ReactorModel.h"
+#include "SDL2/SDL2_gfxPrimitives.h"
+
+// class MGShape {
+//     SDL_Point position_;
+//     SDL_Color color_;
+
+// public:
+//     MGShape(const SDL_Point &position, const SDL_Color &color): position_(position), color_(color) {};
+//     ~MGShape() = default;
+
+//     virtual void draw(SDL_Renderer* renderer) const {
+//         assert(renderer);
+//     }
+// };
+
+// class MGCircle : MGShape {
+//     double radius_;
+
+// public:
+//     MGCircle(const SDL_Point &position, const double radius, const SDL_Color &color):
+//         MGShape(position, color), radius_(radius) {};
+// }
 
 
 class ReactorCanvas : public MGWidget {
-    ReactorModel reactor = {}; 
-public:
-// ReactorModel
-//     (       
-//         const double width, const double height,
-//         std::function<void(ReactorModel&)> onUpdate=nullptr,
-//         std::optional<unsigned int> seed=std::nullopt
-//     ):
-//         width_(width), height_(height),
-//         onUpdate_(onUpdate),
-//         randomGenerator_(seed.value_or(std::random_device{}()))
-//     {}
+    ReactorModel reactor_ = {};
 
-    ReactorCanvas(c)
+    bool nedsRedraw_ = false;
+    
+    // gm_vector<Shape *> geomPrimitives;
+
+public:
+    void redrawRector() {
+        // change current canvas state
+    }
+
+    ReactorCanvas
+    (
+        const int width, const int height,
+        std::optional<unsigned int> seed=std::nullopt,
+        const MGWindow *parent=nullptr
+    ) : 
+        MGWidget(width, height, parent),
+        reactor_(double(width), double(height), [this]() {signalManager_->emit("reactor_updated");}, seed)
+    {
+        signalManager_->connect("reactor_updated", [this]() {
+            this->nedsRedraw_ = true;
+        });
+    }
 private:
     void paintEvent(SDL_Renderer* renderer) override {
         SDL_Rect widgetRect = {0, 0, width_, height_};
@@ -32,8 +64,4 @@ private:
 }
 
 
-
-
-
-
-#endif // REACTORCANVAS_H
+#endif // REACTORCANV
