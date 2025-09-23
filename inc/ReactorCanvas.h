@@ -50,7 +50,7 @@ public:
     void draw(SDL_Renderer* renderer) const override {
         RendererGuard rendererGuard(renderer);
 
-        SDL_Rect square = {position_.x - length_ / 2, position_.y - length_ / 2, position_.x + length_ / 2, position_.y + length_ / 2 };
+        SDL_Rect square = {position_.x - length_ / 2, position_.y - length_ / 2, length_, length_};
         SDL_SetRenderDrawColor(renderer, color_.r, color_.g, color_.b, color_.a);
         SDL_RenderFillRect(renderer, &square);
     }
