@@ -61,13 +61,9 @@ class ReactorCanvas : public MGWidget {
 
     bool nedsRedraw_ = false;
     
-    std::vector<MGShape *> geomPrimitives_;
+    std::vector<MGShape *> geomPrimitives_ = {};
 
 public:
-    void redrawRector() {
-        // change current canvas state
-    }
-
     ReactorCanvas
     (
         const int width, const int height,
@@ -78,21 +74,11 @@ public:
         reactor_(double(width), double(height), nullptr, seed)
     {}
 
-    void setSignalManager(SignalManager *const signalManager) override {
-        signalManager_ = signalManager;
-
-        signalManager_->connect("reactor_updated", [this]() {
-            this->nedsRedraw_ = true;
-        });
-
-        reactor_.setOnUpdate([this]() {signalManager_->emit("reactor_updated");});
-    }
-
     void update() override {
         if (!nedsRedraw_) return;
         nedsRedraw_ = false;
 
-        for (auto molecule : reactor_.getMolecules()) delete molecule;
+        for (auto primitive : geomPrimitives_) delete primitive;
         geomPrimitives_.clear();
 
         for (auto molecule : reactor_.getMolecules()) {
@@ -120,7 +106,28 @@ public:
         }
     }
 
+    void addCirclit() {
+        reactor_.addCirclit();
+    }
+    void addQuadrit() {
+        reactor_.addQuadrit();
+    }
+    
+    void reactorUpdate(int frameDelay) {
+        reactor_.update(frameDelay / SEC_TO_MS);
+    }
+
 private:
+    void setSignalManager(SignalManager *const signalManager) override {
+        signalManager_ = signalManager;
+
+        signalManager_->connect("reactor_updated", [this]() {
+            this->nedsRedraw_ = true;
+        });
+
+        reactor_.setOnUpdate([this]() {signalManager_->emit("reactor_updated");});
+    }
+
     void paintEvent(SDL_Renderer* renderer) override {
         assert(renderer);
 

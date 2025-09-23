@@ -43,10 +43,10 @@ int main(void) {
     ReactorCanvas *reactorCanvas = new ReactorCanvas(360, 360, std::nullopt, reactorWindow);
     reactorWindow->addWidget(reactorCanvas, {20, 20});
 
-    MGButton *button = new MGButton(200, 200, PRESSED_BUTTON_IMAGE_PATH, UNPRESSED_BUTTON_IMAGE_PATH, nullptr, window);
+    MGButton *button = new MGButton(200, 200, PRESSED_BUTTON_IMAGE_PATH, UNPRESSED_BUTTON_IMAGE_PATH, [reactorCanvas](){ reactorCanvas->addCirclit(); }, window);
     window->addWidget(button, {0, 0});
 
-    // application.addEventToMainLoop(ReactorUpdate);
+    application.addEventToMainLoop([reactorCanvas](int frameDelay){ reactorCanvas->reactorUpdate(frameDelay); });
 
     application.run();
     return 0;
