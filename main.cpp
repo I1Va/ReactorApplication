@@ -5,48 +5,44 @@
 #include "ReactorCanvas.h"
 
 
-// const int MAIN_WINDOW_WIDTH = 800;
-// const int MAIN_WINDOW_HEIGHT = 600;
-// const char MAIN_WINDOW_TITLE[] = "MyGUI";
+const int MAIN_WINDOW_WIDTH = 800;
+const int MAIN_WINDOW_HEIGHT = 600;
+const char MAIN_WINDOW_TITLE[] = "MyGUI";
 
-// const char PRESSED_BUTTON_IMAGE_PATH[] = "images/pressedButton.png";
-// const char UNPRESSED_BUTTON_IMAGE_PATH[] = "images/unpressedButton.png";
+const char PRESSED_BUTTON_IMAGE_PATH[] = "images/pressedButton.png";
+const char UNPRESSED_BUTTON_IMAGE_PATH[] = "images/unpressedButton.png";
 
-// void ReactorUpdate() {
-//     std::cout << "Isolate Reactor has updated!\n";
-// }
+void ReactorUpdate() {
+    std::cout << "Isolate Reactor has updated!\n";
+}
 
-// void ReactorAddMolecule() {
-//     std::cout << "ReactorAddMolecule!\n";
-// }
+void ReactorAddMolecule() {
+    std::cout << "ReactorAddMolecule!\n";
+}
 
 int main(void) {
 
-//     MGApplication application;
+    MGApplication application;
     
-//     try {
-//         application.setMainWindow(MAIN_WINDOW_TITLE, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
-//     } catch (const std::exception& e) {
-//         std::cerr << "FATAL : " << e.what() << "\n";
-//         return -1;
-//     }
+    try {
+        application.setMainWindow(MAIN_WINDOW_TITLE, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
+    } catch (const std::exception& e) {
+        std::cerr << "FATAL : " << e.what() << "\n";
+        return -1;
+    }
 
-//     // ReactorModel reactor(100, 100, );
+    // ReactorModel reactor(100, 100, );
 
-//     SignalManager *signalManager = application.getSignalManager();
-//     MGMainWindow *mainWindow = application.getMainWindow();
-//     MGWindow *window = mainWindow->addWindow(200, 200, 400, 400);
-//     MGCanvas *canvas = window->addCanvas(30, 30, 1000, 1000);
+    SignalManager *signalManager = application.getSignalManager();
+    MGMainWindow *mainWindow = application.getMainWindow();
+    MGWindow *window = mainWindow->addWindow(100, 100, 400, 400);
     
-    
-    
-    
-//     window->addCanvas(60, 60, 300, 300);
-//     MGButton *button = window->addButton(30, 30, 100, 100, PRESSED_BUTTON_IMAGE_PATH, UNPRESSED_BUTTON_IMAGE_PATH, ReactorAddMolecule);
+    MGButton *button = new MGButton(200, 200, PRESSED_BUTTON_IMAGE_PATH, UNPRESSED_BUTTON_IMAGE_PATH, nullptr, window);
+    window->addWidget(button, {100, 100});
 
-//     application.addEventToMainLoop(ReactorUpdate);
+    // application.addEventToMainLoop(ReactorUpdate);
 
-//     application.run();
-//     return 0;
+    application.run();
+    return 0;
 }
 
