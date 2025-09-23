@@ -35,10 +35,16 @@ int main(void) {
 
     SignalManager *signalManager = application.getSignalManager();
     MGMainWindow *mainWindow = application.getMainWindow();
-    MGWindow *window = mainWindow->addWindow(100, 100, 400, 400);
+
+    MGWindow *reactorWindow = mainWindow->addWindow(0, 0, 400, 400);
+    MGWindow *window = mainWindow->addWindow(500, 0, 300, 300);
     
+
+    ReactorCanvas *reactorCanvas = new ReactorCanvas(360, 360, std::nullopt, reactorWindow);
+    reactorWindow->addWidget(reactorCanvas, {20, 20});
+
     MGButton *button = new MGButton(200, 200, PRESSED_BUTTON_IMAGE_PATH, UNPRESSED_BUTTON_IMAGE_PATH, nullptr, window);
-    window->addWidget(button, {100, 100});
+    window->addWidget(button, {0, 0});
 
     // application.addEventToMainLoop(ReactorUpdate);
 
