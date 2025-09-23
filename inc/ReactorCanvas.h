@@ -5,6 +5,10 @@
 #include "ReactorModel.h"
 #include "SDL2/SDL2_gfxPrimitives.h"
 
+const SDL_Color CIRCLIT_COLOR = {255, 0, 0, 255};
+const SDL_Color QUADRIT_COLOR = {0, 0, 255, 255};
+
+
 Uint32 SDLColorToUint32(SDL_Color c) {
     return ((Uint32)c.r << 24) | 
            ((Uint32)c.g << 16) | 
@@ -57,7 +61,7 @@ class ReactorCanvas : public MGWidget {
 
     bool nedsRedraw_ = false;
     
-    std::vector<MGShape *> geomPrimitives;
+    std::vector<MGShape *> geomPrimitives_;
 
 public:
     void redrawRector() {
@@ -84,14 +88,49 @@ public:
         reactor_.setOnUpdate([this]() {signalManager_->emit("reactor_updated");});
     }
 
+    void update() override {
+        if (!nedsRedraw_) return;
+        nedsRedraw_ = false;
+
+        for (auto molecule : reactor_.getMolecules()) delete molecule;
+        geomPrimitives_.clear();
+
+        for (auto molecule : reactor_.getMolecules()) {
+            MGShape *curPrimitive = nullptr;
+
+            switch (molecule->getType()) {
+                case MoleculeTypes::CIRCLIT:
+                    curPrimitive = (MGShape *) new MGCircle(
+                        {(int) molecule->getPosition().get_x(), (int) molecule->getPosition().get_x()},
+                        molecule->getSize(), CIRCLIT_COLOR);
+    
+                    geomPrimitives_.push_back(curPrimitive);
+                    break;
+                case MoleculeTypes::QUADRIT:
+                    curPrimitive = (MGShape *) new MGSquare(
+                        {(int) molecule->getPosition().get_x(), (int) molecule->getPosition().get_x()}, 
+                        molecule->getSize(), QUADRIT_COLOR);
+        
+                    geomPrimitives_.push_back(curPrimitive);
+                    break;
+                default:
+                    assert(0 && "ReactorCanvas update() : unknown moleculeType");
+                    break;
+            }
+        }
+    }
+
 private:
     void paintEvent(SDL_Renderer* renderer) override {
+        assert(renderer);
+
         SDL_Rect widgetRect = {0, 0, width_, height_};
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // MGCanvas BACKGROUND COLOR
         SDL_RenderFillRect(renderer, &widgetRect);
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-        SDL_RenderDrawLine(renderer, 0, 0, 1000, 1000);
+        for (auto shape : geomPrimitives_) {
+            shape->draw(renderer);
+        }
     }
 };
 
