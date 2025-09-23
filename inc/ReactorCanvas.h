@@ -87,14 +87,14 @@ public:
             switch (molecule->getType()) {
                 case MoleculeTypes::CIRCLIT:
                     curPrimitive = (MGShape *) new MGCircle(
-                        {(int) molecule->getPosition().get_x(), (int) molecule->getPosition().get_x()},
+                        {(int) molecule->getPosition().get_x(), (int) molecule->getPosition().get_y()},
                         molecule->getSize(), CIRCLIT_COLOR);
     
                     geomPrimitives_.push_back(curPrimitive);
                     break;
                 case MoleculeTypes::QUADRIT:
                     curPrimitive = (MGShape *) new MGSquare(
-                        {(int) molecule->getPosition().get_x(), (int) molecule->getPosition().get_x()}, 
+                        {(int) molecule->getPosition().get_x(), (int) molecule->getPosition().get_y()}, 
                         molecule->getSize(), QUADRIT_COLOR);
         
                     geomPrimitives_.push_back(curPrimitive);
