@@ -83,7 +83,7 @@ public:
 
         for (auto molecule : reactor_.getMolecules()) {
             MGShape *curPrimitive = nullptr;
-
+        
             switch (molecule->getType()) {
                 case MoleculeTypes::CIRCLIT:
                     curPrimitive = (MGShape *) new MGCircle(
@@ -112,9 +112,19 @@ public:
     void addQuadrit() {
         reactor_.addQuadrit();
     }
+
+    void showInfo() {
+        double summaryEnergy = 0;
+        for (auto molecule : reactor_.getMolecules()) {
+            summaryEnergy += molecule->getMass() * molecule->getSpeedVector().get_len2() / 2;
+        }
+
+        // std::cout << "summaryEnergy: " << summaryEnergy << "\n";
+    }
     
     void reactorUpdate(int frameDelay) {
         reactor_.update(frameDelay / SEC_TO_MS);
+        showInfo();
     }
 
 private:

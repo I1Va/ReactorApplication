@@ -12,14 +12,6 @@ const char MAIN_WINDOW_TITLE[] = "MyGUI";
 const char PRESSED_BUTTON_IMAGE_PATH[] = "images/pressedButton.png";
 const char UNPRESSED_BUTTON_IMAGE_PATH[] = "images/unpressedButton.png";
 
-void ReactorUpdate() {
-    std::cout << "Isolate Reactor has updated!\n";
-}
-
-void ReactorAddMolecule() {
-    std::cout << "ReactorAddMolecule!\n";
-}
-
 int main(void) {
 
     MGApplication application;
@@ -31,8 +23,6 @@ int main(void) {
         return -1;
     }
 
-    // ReactorModel reactor(100, 100, );
-
     SignalManager *signalManager = application.getSignalManager();
     MGMainWindow *mainWindow = application.getMainWindow();
 
@@ -41,6 +31,10 @@ int main(void) {
     
 
     ReactorCanvas *reactorCanvas = new ReactorCanvas(360, 360, std::nullopt, reactorWindow);
+    for (size_t i = 0; i < 400; i++) {
+        reactorCanvas->addCirclit();
+    }
+
     reactorWindow->addWidget(reactorCanvas, {20, 20});
 
     MGButton *button = new MGButton(200, 200, PRESSED_BUTTON_IMAGE_PATH, UNPRESSED_BUTTON_IMAGE_PATH, [reactorCanvas](){ reactorCanvas->addCirclit(); }, window);
