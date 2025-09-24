@@ -116,10 +116,10 @@ public:
     void showInfo() {
         double summaryEnergy = 0;
         for (auto molecule : reactor_.getMolecules()) {
-            summaryEnergy += molecule->getMass() * molecule->getSpeedVector().get_len2() / 2;
+            summaryEnergy += molecule->getKinecticEnergy() + molecule->getPotentialEnergy();
         }
 
-        // std::cout << "summaryEnergy: " << summaryEnergy << "\n";
+        std::cout << "summaryEnergy (P + K): " << summaryEnergy << "\n";
     }
     
     void reactorUpdate(int frameDelay) {
