@@ -7,6 +7,7 @@
 
 const SDL_Color CIRCLIT_COLOR = {255, 0, 0, 255};
 const SDL_Color QUADRIT_COLOR = {0, 0, 255, 255};
+const double NARROWING_DELTA = 1;
 
 
 Uint32 SDLColorToUint32(SDL_Color c) {
@@ -112,6 +113,15 @@ public:
     void addQuadrit() {
         reactor_.addQuadrit();
     }
+    void removeMolecule() {
+        reactor_.removeMolecule();
+    }
+    void narrowRightWall() {
+        reactor_.narrowRightWall(NARROWING_DELTA);
+    }
+    void unNarrowRightWall() {
+        reactor_.narrowRightWall(-NARROWING_DELTA);
+    }
 
     void showInfo() {
         double summaryEnergy = 0;
@@ -124,6 +134,8 @@ public:
     
     void reactorUpdate(int frameDelay) {
         reactor_.update(frameDelay / SEC_TO_MS);
+        width_ = (int) reactor_.getWidth();
+        height_ = (int) reactor_.getHeight();
         showInfo();
     }
 
