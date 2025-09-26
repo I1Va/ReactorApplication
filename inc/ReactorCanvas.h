@@ -7,7 +7,7 @@
 
 const SDL_Color CIRCLIT_COLOR = {255, 0, 0, 255};
 const SDL_Color QUADRIT_COLOR = {0, 0, 255, 255};
-const double NARROWING_DELTA = 1;
+const double NARROWING_DELTA = 10;
 
 
 Uint32 SDLColorToUint32(SDL_Color c) {
@@ -128,8 +128,15 @@ public:
         for (auto molecule : reactor_.getMolecules()) {
             summaryEnergy += molecule->getKinecticEnergy() + molecule->getPotentialEnergy();
         }
+        for (size_t i = 0; i < 4; i++) {
+            std::cout << "wall[" << i << "].energy = " << reactor_.getReactorWalls()[i].energy << ", ";
+        }
 
-        std::cout << "summaryEnergy (P + K): " << summaryEnergy << "\n";
+        std::cout << "systemEnergy : " << summaryEnergy << "\n";
+        for (size_t i = 0; i < 4; i++) {
+            std::cout << "wall[" << i << "].energy = " << reactor_.getReactorWalls()[i].energy << ", ";
+        }
+        std::cout << "\n\n";
     }
     
     void reactorUpdate(int frameDelay) {

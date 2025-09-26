@@ -45,9 +45,9 @@ int main(void) {
 
 
     ReactorCanvas *reactorCanvas = new ReactorCanvas(REACTOR_SZ, REACTOR_SZ, std::nullopt, reactorWindow);
-    // for (size_t i = 0; i < 400; i++) {
-    //     reactorCanvas->addCirclit();
-    // }
+    for (size_t i = 0; i < 400; i++) {
+        reactorCanvas->addCirclit();
+    }
 
     reactorWindow->addWidget(reactorCanvas, {REACTOR_BORDER, REACTOR_BORDER});
 
