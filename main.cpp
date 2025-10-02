@@ -79,13 +79,42 @@
 //     return 0;
 // }
 
+class Button : public Widget {
+    
+public:
+    Button(int x, int y, int w, int h) : Widget(x, y, w, h) {}    
+
+
+    void paintEvent(SDL_Renderer* renderer) {
+        assert(renderer);
+
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); 
+        SDL_Rect full = {0, 0, rect_.w, rect_.h};
+        SDL_RenderFillRect(renderer, &full);
+    }
+};
+
+
 int main() {
-    UIManager application();
+    UIManager application(800, 600);
 
-    Widget *wgt = new Widget(1, 1, 10, 10);
+    Container *window = new Container(0, 0, 800, 800);
 
-    application.setMainWidget()
+    
+    for (int i = 0; i < 5; i++) {
+        Button *w1 = new Button(100 * i, 100 * i, 100, 100);
+        window->addWdiget(w1);
+    }
+    
 
+
+
+
+    application.setMainWidget(window);
+
+
+
+    application.run();
 
 
 
