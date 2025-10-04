@@ -94,17 +94,42 @@ public:
     }
 };
 
+class Window : public Container {
+public:
+    Window(int x, int y, int w, int h) : Container(x, y, w, h) {}    
+
+
+    void paintEvent(SDL_Renderer* renderer) {
+        assert(renderer);
+
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); 
+        SDL_Rect full = {0, 0, rect_.w, rect_.h};
+        SDL_RenderFillRect(renderer, &full);
+    }
+};
+
+
+
 
 int main() {
     UIManager application(800, 600);
 
-    Container *window = new Container(0, 0, 800, 800);
+    Window *window = new Window(100, 100, 600, 400);
+
+    // Container *subWindow1 = new Container(100, 100, 100, 100);
+
+    // Window *subWindow2 = new Window(30, 30, 30, 30);
+
+
+    // window->addWdiget(subWindow1);
+    // subWindow1->addWdiget(subWindow2);
+
 
     
-    for (int i = 0; i < 5; i++) {
-        Button *w1 = new Button(100 * i, 100 * i, 100, 100);
-        window->addWdiget(w1);
-    }
+    // for (int i = 0; i < 5; i++) {
+    //     Button *w1 = new Button(100 * i, 100 * i, 100, 100);
+    //     window->addWdiget(w1);
+    // }
     
 
 
