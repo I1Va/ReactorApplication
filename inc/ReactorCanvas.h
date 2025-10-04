@@ -157,7 +157,7 @@
 //         reactor_.setOnUpdate([this]() {signalManager_->emit("reactor_updated");});
 //     }
 
-//     void paintEvent(SDL_Renderer* renderer) override {
+//     void renderSelfAction(SDL_Renderer* renderer) override {
 //         assert(renderer);
 
 //         SDL_Rect widgetRect = {0, 0, width_, height_};

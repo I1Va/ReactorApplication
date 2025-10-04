@@ -79,13 +79,22 @@
 //     return 0;
 // }
 
-class Button : public Widget {
-    
+
+
+// void renderSelfAction(SDL_Renderer* renderer) {
+//     assert(renderer);
+
+//     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); 
+//     SDL_Rect full = {0, 0, rect_.w, rect_.h};
+//     SDL_RenderFillRect(renderer, &full);
+// }
+
+
+class ReactorGUI : public Window {
 public:
-    Button(int x, int y, int w, int h) : Widget(x, y, w, h) {}    
+    ReactorGUI(int x, int y, int w, int h): Window(x, y, w, h) {}
 
-
-    void paintEvent(SDL_Renderer* renderer) {
+    void renderSelfAction(SDL_Renderer* renderer) override {
         assert(renderer);
 
         SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); 
@@ -93,51 +102,37 @@ public:
         SDL_RenderFillRect(renderer, &full);
     }
 };
-
-class Window : public Container {
-public:
-    Window(int x, int y, int w, int h) : Container(x, y, w, h) {}    
-
-
-    void paintEvent(SDL_Renderer* renderer) {
-        assert(renderer);
-
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); 
-        SDL_Rect full = {0, 0, rect_.w, rect_.h};
-        SDL_RenderFillRect(renderer, &full);
-    }
-};
-
-
 
 
 int main() {
     UIManager application(800, 600);
+    Window *reactor = new ReactorGUI(100, 100, 600, 400);
+    application.setMainWidget(reactor);
 
-    Window *window = new Window(100, 100, 600, 400);
 
+    
     Container *window_c1 = new Container(100, 100, 100, 100);
     Container *window_c2 = new Container(300, 200, 200, 200);
 
     Window *grand_c1 = new Window(30, 30, 30, 30);
 
 
-    window->addWdiget(window_c1);
-    window->addWdiget(window_c2);
-    window_c1->addWdiget(grand_c1);
+    reactor->addWidget(window_c1);
+    reactor->addWidget(window_c2);
+    window_c1->addWidget(grand_c1);
 
 
     
     // for (int i = 0; i < 5; i++) {
     //     Button *w1 = new Button(100 * i, 100 * i, 100, 100);
-    //     window->addWdiget(w1);
+    //     window->addWidget(w1);
     // }
     
 
 
 
 
-    application.setMainWidget(window);
+    
 
 
 
