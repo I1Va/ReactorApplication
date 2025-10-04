@@ -116,13 +116,13 @@ int main() {
 
     Window *window = new Window(100, 100, 600, 400);
 
-    // Container *subWindow1 = new Container(100, 100, 100, 100);
+    Container *subWindow1 = new Container(100, 100, 100, 100);
 
-    // Window *subWindow2 = new Window(30, 30, 30, 30);
+    Window *subWindow2 = new Window(30, 30, 30, 30);
 
 
-    // window->addWdiget(subWindow1);
-    // subWindow1->addWdiget(subWindow2);
+    window->addWdiget(subWindow1);
+    subWindow1->addWdiget(subWindow2);
 
 
     
