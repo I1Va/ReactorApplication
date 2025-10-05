@@ -9,18 +9,6 @@
 // const int MAIN_WINDOW_HEIGHT = 600;
 // const char MAIN_WINDOW_TITLE[] = "MyGUI";
 
-// const char NARROW_RIGHTWALL[] = "images/NarrowRightWall.png";
-// const char NARROW_RIGHTWALL_PRESSED[] = "images/NarrowRightWallPressed.png";
-// const char UNNARROW_RIGHTWALL[] = "images/UnNarrowRightWall.png";
-// const char UNNARROW_RIGHTWALL_PRESSED[] = "images/UnNarrowRightWalPressed.png";
-
-// const char ADD_CIRCLIT_PRESSED[] = "images/addCirclitPressed.png";
-// const char ADD_CIRCLIT[] = "images/addCirclitUnPressed.png";
-// const char ADD_QUADRIT_PRESSED[] = "images/addQuadritPressed.png";
-// const char ADD_QUADRIT[] = "images/addQuadritUnPressed.png";
-// const char REMOVE_MOLECULE[] = "images/removeMolecule.png";
-// const char REMOVE_MOLECULE_PRESSED[] = "images/removeMoleculePressed.png";
-
 // const size_t BUTTON_SZ = 50;
 // const size_t REACTOR_SZ = 300;
 // const size_t REACTOR_BORDER = 30;
@@ -91,8 +79,30 @@
 
 
 class ReactorGUI : public Window {
+    static constexpr const int REACTOR_GUI_HEIGHT = 250;
+    static constexpr const int REACTOR_GUI_WIDTH = 200;
+
+    const int BUTTON_PANEL_HEIGHT = 100;
+    const int BUTTON_SIZE = 50;
+
+    static constexpr const char NARROW_RIGHTWALL[] = "images/NarrowRightWall.png";
+    static constexpr const char NARROW_RIGHTWALL_PRESSED[] = "images/NarrowRightWallPressed.png";
+    static constexpr const char UNNARROW_RIGHTWALL[] = "images/UnNarrowRightWall.png";
+    static constexpr const char UNNARROW_RIGHTWALL_PRESSED[] = "images/UnNarrowRightWalPressed.png";
+
+    static constexpr const char ADD_CIRCLIT_PRESSED[] = "images/addCirclitPressed.png";
+    static constexpr const char ADD_CIRCLIT[] = "images/addCirclitUnPressed.png";
+    static constexpr const char ADD_QUADRIT_PRESSED[] = "images/addQuadritPressed.png";
+    static constexpr const char ADD_QUADRIT[] = "images/addQuadritUnPressed.png";
+    static constexpr const char REMOVE_MOLECULE[] = "images/removeMolecule.png";
+    static constexpr const char REMOVE_MOLECULE_PRESSED[] = "images/removeMoleculePressed.png";
+
 public:
-    ReactorGUI(int x, int y, int w, int h): Window(x, y, w, h) {}
+    ReactorGUI(): Window(REACTOR_GUI_WIDTH, REACTOR_GUI_HEIGHT) {
+        int buttonStartY = REACTOR_GUI_HEIGHT - BUTTON_PANEL_HEIGHT;
+        Button *addCirclitBtn = new Button(BUTTON_SIZE, BUTTON_SIZE, ADD_CIRCLIT, ADD_CIRCLIT_PRESSED, nullptr, this);
+        addWidget(0, buttonStartY, addCirclitBtn);
+    }
 
     void renderSelfAction(SDL_Renderer* renderer) override {
         assert(renderer);
@@ -103,42 +113,27 @@ public:
     }
 };
 
+// Button
+//     (
+//         int x, int y, int w, int h,
+//         const char *unpressedButtonTexturePath, const char *pressedButtonTexturePath,
+//         std::function<void()> onClickFunction=nullptr, Widget *parent=nullptr
+//     ): 
+
 
 int main() {
     UIManager application(800, 600);
-    Window *reactor = new ReactorGUI(100, 100, 600, 400);
-    application.setMainWidget(reactor);
 
+    Container *mainWindow = new Container(780, 580);
+    application.setMainWidget(10, 10, mainWindow);    
 
-    
-    Container *window_c1 = new Container(100, 100, 100, 100);
-    Container *window_c2 = new Container(300, 200, 200, 200);
+    ReactorGUI *reactor1 = new ReactorGUI();
+    ReactorGUI *reactor2 = new ReactorGUI();
 
-    Window *grand_c1 = new Window(30, 30, 30, 30);
-
-
-    reactor->addWidget(window_c1);
-    reactor->addWidget(window_c2);
-    window_c1->addWidget(grand_c1);
-
-
-    
-    // for (int i = 0; i < 5; i++) {
-    //     Button *w1 = new Button(100 * i, 100 * i, 100, 100);
-    //     window->addWidget(w1);
-    // }
-    
-
-
-
-
-    
-
-
+    mainWindow->addWidget(0, 0, reactor1);
+    mainWindow->addWidget(100, 100, reactor2);
 
     application.run();
-
-
 
     return 0;
 }
