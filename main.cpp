@@ -79,11 +79,14 @@
 
 
 class ReactorGUI : public Window {
-    static constexpr const int REACTOR_GUI_HEIGHT = 250;
-    static constexpr const int REACTOR_GUI_WIDTH = 200;
+    static constexpr const int BORDER_SIZE = 10;
+    static constexpr const int REACTOR_GUI_HEIGHT = 400;
+    static constexpr const int REACTOR_GUI_WIDTH = 350;
 
-    const int BUTTON_PANEL_HEIGHT = 100;
-    const int BUTTON_SIZE = 50;
+    static constexpr const int REACTOR_HEIGHT = 300;
+    static constexpr const int REACTOR_WIDTH = REACTOR_GUI_WIDTH - 2 * BORDER_SIZE;
+    static constexpr const int BUTTON_PANEL_HEIGHT = REACTOR_GUI_HEIGHT - REACTOR_HEIGHT - 2 * BORDER_SIZE;
+    static constexpr const int BUTTON_SIZE = 50;
 
     static constexpr const char NARROW_RIGHTWALL[] = "images/NarrowRightWall.png";
     static constexpr const char NARROW_RIGHTWALL_PRESSED[] = "images/NarrowRightWallPressed.png";
@@ -101,7 +104,11 @@ public:
     ReactorGUI(): Window(REACTOR_GUI_WIDTH, REACTOR_GUI_HEIGHT) {
         int buttonStartY = REACTOR_GUI_HEIGHT - BUTTON_PANEL_HEIGHT;
         Button *addCirclitBtn = new Button(BUTTON_SIZE, BUTTON_SIZE, ADD_CIRCLIT, ADD_CIRCLIT_PRESSED, nullptr, this);
-        addWidget(0, buttonStartY, addCirclitBtn);
+
+        ReactorCanvas *reactor = new ReactorCanvas(REACTOR_WIDTH, REACTOR_HEIGHT, std::nullopt, 40, this);
+        addWidget(BORDER_SIZE, BORDER_SIZE, reactor);
+
+        addWidget(BORDER_SIZE, buttonStartY, addCirclitBtn);
     }
 
     void renderSelfAction(SDL_Renderer* renderer) override {
@@ -127,12 +134,9 @@ int main() {
     Container *mainWindow = new Container(780, 580);
     application.setMainWidget(10, 10, mainWindow);    
 
-    ReactorGUI *reactor1 = new ReactorGUI();
-    ReactorGUI *reactor2 = new ReactorGUI();
+    ReactorGUI *reactor = new ReactorGUI();
 
-    mainWindow->addWidget(0, 0, reactor1);
-    mainWindow->addWidget(100, 100, reactor2);
-
+    mainWindow->addWidget(10, 10, reactor);
     application.run();
 
     return 0;
