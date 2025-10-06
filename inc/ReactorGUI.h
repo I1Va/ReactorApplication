@@ -8,6 +8,8 @@
 const SDL_Color CIRCLIT_COLOR = {255, 0, 0, 255};
 const SDL_Color QUADRIT_COLOR = {0, 0, 255, 255};
 const SDL_Color REACTOR_COLOR = {220, 220, 220, 255};
+const SDL_Color REACTOR_WALL_COLOR = {150, 150, 150, 255};
+const int REACTOR_WALL_WIDTH = 10;
 
 const double NARROWING_DELTA = 10;
 const int SEC_TO_MS = 1000;
@@ -62,7 +64,32 @@ public:
     }
 };
 
-class ReactorView : public Container {
+class ReactorWallWidget : public Widget {
+    double currentEnergy_ = 1;
+    double systemSummaryEnergy_ = 1;
+    SDL_Color wallStartColor_ = {};
+    Uint8 redColorPart = 0;
+
+public:
+    ReactorWallWidget(int width, int height, SDL_Color wallColor, Widget *parent=nullptr): Widget(width, height, parent), wallStartColor_(wallColor) {}
+
+    void setWallEnergyPair(double currentEnergy, double systemSummaryEnergy) {
+        currentEnergy_ = currentEnergy;
+        systemSummaryEnergy_ = systemSummaryEnergy;
+        redColorPart = std::max((Uint8) 255,  (Uint8) (wallStartColor_.r + (255 * currentEnergy_ / systemSummaryEnergy_)));
+        setRerenderFlag();
+    }
+
+    void renderSelfAction(SDL_Renderer* renderer) override {
+        assert(renderer);
+
+        SDL_Rect widgetRect = {0, 0, rect_.w, rect_.h};
+        SDL_SetRenderDrawColor(renderer, redColorPart, wallStartColor_.g, wallStartColor_.b, wallStartColor_.a);
+        SDL_RenderFillRect(renderer, &widgetRect);
+    }
+};
+
+class ReactorCanvas : public Container {
     bool needReCalc_ = false;
     const ReactorModel& reactorModel_;
     
@@ -72,19 +99,29 @@ class ReactorView : public Container {
     std::vector<MGShape *> geomPrimitives_ = {}; // molecules
 
 public:
-    ReactorView
+    ReactorCanvas
     (
-        const int width, const int height,
         const ReactorModel& reactorModel,
         Widget *parent=nullptr
     ) : 
-        Container(width, height, parent),
+        Container(reactorModel.getWidth(), reactorModel.getHeight(), parent),
         reactorModel_(reactorModel)
-    {}
+    {
+        ReactorWallWidget *leftWall   = new ReactorWallWidget(REACTOR_WALL_WIDTH, rect_.h, REACTOR_WALL_COLOR, this);
+        ReactorWallWidget *rightWall  = new ReactorWallWidget(REACTOR_WALL_WIDTH, rect_.h, REACTOR_WALL_COLOR, this);
+        ReactorWallWidget *topWall    = new ReactorWallWidget(rect_.w, REACTOR_WALL_WIDTH, REACTOR_WALL_COLOR, this);
+        ReactorWallWidget *bottomWall = new ReactorWallWidget(rect_.w, REACTOR_WALL_WIDTH, REACTOR_WALL_COLOR, this);
 
-    ~ReactorView() override {
-        for (Widget *child : children_) delete child;
     
+        addWidget(0, REACTOR_WALL_WIDTH, leftWall);
+    
+        addWidget(REACTOR_WALL_WIDTH, 0, topWall);
+        addWidget(REACTOR_WALL_WIDTH, REACTOR_WALL_WIDTH + rect_.h, bottomWall);
+
+        addWidget(REACTOR_WALL_WIDTH + rect_.w, REACTOR_WALL_WIDTH, rightWall);
+    }
+
+    ~ReactorCanvas() override {
         for (MGShape *shape : geomPrimitives_) delete shape;
     }
 
@@ -120,7 +157,7 @@ public:
                     geomPrimitives_.push_back(curPrimitive);
                     break;
                 default:
-                    assert(0 && "ReactorView update() : unknown moleculeType");
+                    assert(0 && "ReactorCanvas update() : unknown moleculeType");
                     break;
             }
         }
@@ -154,7 +191,7 @@ public:
         assert(renderer);
 
         // showInfo();
-
+    
         SDL_Rect widgetRect = {0, 0, rect_.w, rect_.h};
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // MGCanvas BACKGROUND COLOR
         SDL_RenderFillRect(renderer, &widgetRect);
@@ -163,27 +200,26 @@ public:
             shape->draw(renderer);
         }
     }
-
-
 };
 
-class ReactorCanvas : public Container {
-    ReactorView *reactorView_ = nullptr;
+class ReactorVisibleArea : public Container {
+    ReactorCanvas *ReactorCanvas_ = nullptr;
 public:
-    ReactorCanvas
+    ReactorVisibleArea
     (
         int canvasWidth, int CanvasHeight, 
-        int ReactorWidth, int ReactorHeight, const ReactorModel& reactorModel,
+        const ReactorModel& reactorModel,
         Widget *parent=nullptr
     ): 
         Container(canvasWidth, CanvasHeight, parent) 
     {
-        reactorView_ = new ReactorView(ReactorWidth, ReactorHeight, reactorModel, this);
-        addWidget(0, 0, reactorView_);
+        ReactorCanvas_ = new ReactorCanvas(reactorModel, this);
+        
+        addWidget(0, 0, ReactorCanvas_);
     }
 
     void setRecalcState() {
-        reactorView_->setRecalcState();
+        ReactorCanvas_->setRecalcState();
     }
 
     void renderSelfAction(SDL_Renderer* renderer) override {
@@ -220,7 +256,7 @@ class ReactorGUI : public Window {
     ReactorModel reactorModel_;
     int reactorUpdateDelayMS_;
 
-    ReactorCanvas *reactorCanvas_ = nullptr;
+    ReactorVisibleArea *ReactorVisibleArea_ = nullptr;
 
 private:
     Container *createReactorButtonPanel(int width, int height) {
@@ -272,14 +308,16 @@ public:
        
         int REACTOR_MODEL_WIDTH = REACTOR_CANVAS_WIDTH;
         int REACTOR_MODEL_HEIGHT = REACTOR_CANVAS_HEIGHT;
-        reactorCanvas_ = new ReactorCanvas(REACTOR_CANVAS_WIDTH, REACTOR_CANVAS_HEIGHT, 
-                                           REACTOR_MODEL_WIDTH, REACTOR_MODEL_HEIGHT,
-                                           reactorModel_, this);
+    
+        ReactorVisibleArea_ = new ReactorVisibleArea(REACTOR_CANVAS_WIDTH, REACTOR_CANVAS_HEIGHT, 
+                                                     reactorModel_, this);
         
-        addWidget(BORDER_SIZE, BORDER_SIZE, reactorCanvas_);
+        addWidget(BORDER_SIZE, BORDER_SIZE, ReactorVisibleArea_);
 
         int buttonPanelWidth    =  REACTOR_GUI_WIDTH - 2 * BORDER_SIZE;
+        
         int buttonPanelHeight   = REACTOR_GUI_HEIGHT - REACTOR_CANVAS_HEIGHT - 3 * BORDER_SIZE;
+       
 
         Container *ButtonPanel = createReactorButtonPanel(buttonPanelWidth, buttonPanelHeight);
 
@@ -293,7 +331,7 @@ public:
 
         if (passedDeltaMS >= reactorUpdateDelayMS_) {
             reactorModel_.update(double(reactorUpdateDelayMS_) / SEC_TO_MS);
-            reactorCanvas_->setRecalcState();
+            ReactorVisibleArea_->setRecalcState();
             passedDeltaMS -= reactorUpdateDelayMS_;
         }
     }

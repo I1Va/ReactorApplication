@@ -31,27 +31,27 @@
 //     // MGWindow *window = mainWindow->addWindow(200, 200, 400, 400);   
 
 
-//     ReactorView *ReactorView = new ReactorView(REACTOR_SZ, REACTOR_SZ, std::nullopt, reactorWindow);
+//     ReactorCanvas *ReactorCanvas = new ReactorCanvas(REACTOR_SZ, REACTOR_SZ, std::nullopt, reactorWindow);
 //     for (size_t i = 0; i < 400; i++) {
-//         ReactorView->addCirclit();
+//         ReactorCanvas->addCirclit();
 //     }
 
-//     reactorWindow->addWidget(ReactorView, {REACTOR_BORDER, REACTOR_BORDER});
+//     reactorWindow->addWidget(ReactorCanvas, {REACTOR_BORDER, REACTOR_BORDER});
 
 //     MGButton *addCirclitBtn = new MGButton(BUTTON_SZ, BUTTON_SZ, ADD_CIRCLIT, ADD_CIRCLIT_PRESSED,
-//                                            [ReactorView](){ ReactorView->addCirclit(); }, reactorWindow);
+//                                            [ReactorCanvas](){ ReactorCanvas->addCirclit(); }, reactorWindow);
                                         
 //     MGButton *addQuadrittBtn = new MGButton(BUTTON_SZ, BUTTON_SZ, ADD_QUADRIT, ADD_QUADRIT_PRESSED, 
-//                                             [ReactorView](){ ReactorView->addQuadrit(); }, reactorWindow);
+//                                             [ReactorCanvas](){ ReactorCanvas->addQuadrit(); }, reactorWindow);
                                         
 //     MGButton *removeMoleculeBtn = new MGButton(BUTTON_SZ, BUTTON_SZ, REMOVE_MOLECULE, REMOVE_MOLECULE_PRESSED, 
-//                                                [ReactorView](){ ReactorView->removeMolecule(); }, reactorWindow);
+//                                                [ReactorCanvas](){ ReactorCanvas->removeMolecule(); }, reactorWindow);
                                             
 //     MGButton *narrowRightWallBtn = new MGButton(BUTTON_SZ, BUTTON_SZ, NARROW_RIGHTWALL, NARROW_RIGHTWALL_PRESSED, 
-//                                                 [ReactorView](){ ReactorView->narrowRightWall(); }, reactorWindow);
+//                                                 [ReactorCanvas](){ ReactorCanvas->narrowRightWall(); }, reactorWindow);
 
 //     MGButton *unNarrowRightWallBtn = new MGButton(BUTTON_SZ, BUTTON_SZ, UNNARROW_RIGHTWALL, UNNARROW_RIGHTWALL_PRESSED, 
-//                                                 [ReactorView](){ ReactorView->unNarrowRightWall(); }, reactorWindow);
+//                                                 [ReactorCanvas](){ ReactorCanvas->unNarrowRightWall(); }, reactorWindow);
 
 
 //     reactorWindow->addWidget(addCirclitBtn, {REACTOR_SZ + REACTOR_BORDER, REACTOR_BORDER});
@@ -60,7 +60,7 @@
 //     reactorWindow->addWidget(narrowRightWallBtn, {REACTOR_SZ + REACTOR_BORDER, REACTOR_BORDER + BUTTON_SZ});
 //     reactorWindow->addWidget(unNarrowRightWallBtn, {REACTOR_SZ + REACTOR_BORDER + BUTTON_SZ, REACTOR_BORDER + BUTTON_SZ});
     
-//     application.addEventToMainLoop([ReactorView](int frameDelay){ ReactorView->reactorUpdate(frameDelay); });
+//     application.addEventToMainLoop([ReactorCanvas](int frameDelay){ ReactorCanvas->reactorUpdate(frameDelay); });
 
 //     application.run();
 //     return 0;
