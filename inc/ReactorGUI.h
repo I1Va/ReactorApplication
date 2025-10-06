@@ -91,49 +91,79 @@ public:
 
 class ReactorCanvas : public Container {
     bool needReCalc_ = false;
-    const ReactorModel& reactorModel_;
+    bool needReSize_ = false;
     
+    int reactorWidth_;
+    int reactorHeight_;
+    ReactorModel reactorModel_;
+    
+    std::vector<MGShape *> geomPrimitives_ = {};
+    ReactorWallWidget *leftWall     = nullptr;  
+    ReactorWallWidget *rightWall    = nullptr; 
+    ReactorWallWidget *topWall      = nullptr;
+    ReactorWallWidget *bottomWall   = nullptr;
 
-    // visible area of ​​the rector and walls
-    // wall1, wall2, wall3, wall4 
-    std::vector<MGShape *> geomPrimitives_ = {}; // molecules
+private:
+    void recalculateReactorCanvasSize() {
+        leftWall->setSize(REACTOR_WALL_WIDTH, reactorHeight_);
+        rightWall->setSize(REACTOR_WALL_WIDTH, reactorHeight_);
+        topWall->setSize(reactorWidth_, REACTOR_WALL_WIDTH);
+        bottomWall->setSize(reactorWidth_, REACTOR_WALL_WIDTH);
+
+        leftWall->setPosition(0, REACTOR_WALL_WIDTH);
+        topWall->setPosition(REACTOR_WALL_WIDTH, 0);
+        bottomWall->setPosition(REACTOR_WALL_WIDTH, REACTOR_WALL_WIDTH + reactorHeight_);
+        rightWall->setPosition(REACTOR_WALL_WIDTH + reactorWidth_, REACTOR_WALL_WIDTH);
+
+        leftWall->setRerenderFlag();
+        topWall->setRerenderFlag();
+        bottomWall->setRerenderFlag();
+        rightWall->setRerenderFlag();
+
+        needReSize_ = false;
+    }
+    
+    void createReactorWalls() {
+        leftWall   = new ReactorWallWidget(0, 0, REACTOR_WALL_COLOR, this);
+        rightWall  = new ReactorWallWidget(0, 0, REACTOR_WALL_COLOR, this);
+        topWall    = new ReactorWallWidget(0, 0, REACTOR_WALL_COLOR, this);
+        bottomWall = new ReactorWallWidget(0, 0, REACTOR_WALL_COLOR, this);
+
+    
+        addWidget(0, 0, leftWall);
+
+        addWidget(0, 0, topWall);
+        addWidget(0, 0, bottomWall);
+
+        addWidget(0, 0, rightWall);
+
+        recalculateReactorCanvasSize();
+    }
 
 public:
     ReactorCanvas
     (
-        const ReactorModel& reactorModel,
+        int width, int height,
         Widget *parent=nullptr
     ) : 
-        Container(reactorModel.getWidth(), reactorModel.getHeight(), parent),
-        reactorModel_(reactorModel)
+        Container(width, height, parent),
+        reactorWidth_(width - 2 * REACTOR_WALL_WIDTH),
+        reactorHeight_(height - 2 * REACTOR_WALL_WIDTH),
+        reactorModel_(reactorWidth_, reactorHeight_)
     {
-        ReactorWallWidget *leftWall   = new ReactorWallWidget(REACTOR_WALL_WIDTH, rect_.h, REACTOR_WALL_COLOR, this);
-        ReactorWallWidget *rightWall  = new ReactorWallWidget(REACTOR_WALL_WIDTH, rect_.h, REACTOR_WALL_COLOR, this);
-        ReactorWallWidget *topWall    = new ReactorWallWidget(rect_.w, REACTOR_WALL_WIDTH, REACTOR_WALL_COLOR, this);
-        ReactorWallWidget *bottomWall = new ReactorWallWidget(rect_.w, REACTOR_WALL_WIDTH, REACTOR_WALL_COLOR, this);
-
-    
-        addWidget(0, REACTOR_WALL_WIDTH, leftWall);
-    
-        addWidget(REACTOR_WALL_WIDTH, 0, topWall);
-        addWidget(REACTOR_WALL_WIDTH, REACTOR_WALL_WIDTH + rect_.h, bottomWall);
-
-        addWidget(REACTOR_WALL_WIDTH + rect_.w, REACTOR_WALL_WIDTH, rightWall);
+        createReactorWalls();  
     }
 
     ~ReactorCanvas() override {
         for (MGShape *shape : geomPrimitives_) delete shape;
     }
 
-    void setRecalcState() { needReCalc_ = true; }
+    ReactorModel *reactorModel() { return &reactorModel_; }
 
-    bool updateSelfAction() override {
-        if (!needReCalc_) return false;
-        needReCalc_ = false;
-        setRerenderFlag();
-        
-        setSize(reactorModel_.getWidth(), reactorModel_.getHeight());
+    void setRecalcFlag() { needReCalc_ = true; }
+    void setUpdateSizeFlag() { needReSize_ = true; }
 
+    void recalculateMoleculePrimitives() {
         for (auto primitive : geomPrimitives_) delete primitive;
         geomPrimitives_.clear();
 
@@ -144,14 +174,14 @@ public:
     
                 case MoleculeTypes::CIRCLIT:
                     curPrimitive = (MGShape *) new MGCircle(
-                        {(int) molecule->getPosition().get_x(), (int) molecule->getPosition().get_y()},
+                        {(int) molecule->getPosition().get_x() + REACTOR_WALL_WIDTH, (int) molecule->getPosition().get_y() + REACTOR_WALL_WIDTH},
                         molecule->getSize(), CIRCLIT_COLOR);
     
                     geomPrimitives_.push_back(curPrimitive);
                     break;
                 case MoleculeTypes::QUADRIT:
                     curPrimitive = (MGShape *) new MGSquare(
-                        {(int) molecule->getPosition().get_x(), (int) molecule->getPosition().get_y()},
+                        {(int) molecule->getPosition().get_x() + REACTOR_WALL_WIDTH, (int) molecule->getPosition().get_y() + REACTOR_WALL_WIDTH},
                         molecule->getSize(), QUADRIT_COLOR);
         
                     geomPrimitives_.push_back(curPrimitive);
@@ -161,6 +191,17 @@ public:
                     break;
             }
         }
+        needReCalc_ = false;
+    }
+
+    bool updateSelfAction() override {
+        if (!(needReCalc_ || needReSize_)) return false;
+
+        if (needReSize_) recalculateReactorCanvasSize();
+        if (needReCalc_) recalculateMoleculePrimitives();
+        
+        setRerenderFlag();
+
         return true;
     }
 
@@ -189,8 +230,6 @@ public:
 
     void renderSelfAction(SDL_Renderer* renderer) override {
         assert(renderer);
-
-        // showInfo();
     
         SDL_Rect widgetRect = {0, 0, rect_.w, rect_.h};
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // MGCanvas BACKGROUND COLOR
@@ -200,27 +239,34 @@ public:
             shape->draw(renderer);
         }
     }
+
+    void addCirclit() {
+        reactorModel_.addCirclit();
+    }
+    void addQuadrit() {
+        reactorModel_.addQuadrit();
+    }
+    void removeMolecule() {
+        reactorModel_.removeMolecule();
+    }
+    void narrowRightWall() {
+        reactorModel_.narrowRightWall(NARROWING_DELTA);
+        reactorWidth_ = std::max(MIN_REACTOR_SIZE, reactorWidth_ - NARROWING_DELTA);
+        setUpdateSizeFlag();
+    }
+    void unNarrowRightWall() {
+        reactorModel_.narrowRightWall(-NARROWING_DELTA);
+        reactorWidth_ = std::max(MIN_REACTOR_SIZE, reactorWidth_ + NARROWING_DELTA);
+        
+        setUpdateSizeFlag();
+    }
 };
 
 class ReactorVisibleArea : public Container {
     ReactorCanvas *ReactorCanvas_ = nullptr;
 public:
-    ReactorVisibleArea
-    (
-        int canvasWidth, int CanvasHeight, 
-        const ReactorModel& reactorModel,
-        Widget *parent=nullptr
-    ): 
-        Container(canvasWidth, CanvasHeight, parent) 
-    {
-        ReactorCanvas_ = new ReactorCanvas(reactorModel, this);
-        
-        addWidget(0, 0, ReactorCanvas_);
-    }
-
-    void setRecalcState() {
-        ReactorCanvas_->setRecalcState();
-    }
+    ReactorVisibleArea (int visibleWidth, int visibleHeight, Widget *parent=nullptr): 
+        Container(visibleWidth, visibleHeight, parent) {}
 
     void renderSelfAction(SDL_Renderer* renderer) override {
         assert(renderer);
@@ -252,11 +298,10 @@ class ReactorGUI : public Window {
     static constexpr const char REMOVE_MOLECULE[] = "images/removeMolecule.png";
     static constexpr const char REMOVE_MOLECULE_PRESSED[] = "images/removeMoleculePressed.png";
 
-
-    ReactorModel reactorModel_;
     int reactorUpdateDelayMS_;
 
-    ReactorVisibleArea *ReactorVisibleArea_ = nullptr;
+    ReactorModel *reactorModel_ = nullptr;
+    ReactorCanvas *reactorCanvas_ = nullptr;
 
 private:
     Container *createReactorButtonPanel(int width, int height) {
@@ -269,11 +314,11 @@ private:
         Container *buttonPanel = new Container(width, height, this);
         
        
-        Button *addCirclitBtn        = new Button(buttonWidth, buttonHeight, ADD_CIRCLIT, ADD_CIRCLIT_PRESSED, [this](){ addCirclit(); }, buttonPanel);
-        Button *addQuadritBtn        = new Button(buttonWidth, buttonHeight, ADD_QUADRIT, ADD_QUADRIT_PRESSED, [this](){ addQuadrit(); }, buttonPanel);
-        Button *removeMoleculeBtn    = new Button(buttonWidth, buttonHeight, REMOVE_MOLECULE, REMOVE_MOLECULE_PRESSED, [this](){ removeMolecule(); }, buttonPanel);
-        Button *narrowRightWallBtn   = new Button(buttonWidth, buttonHeight, NARROW_RIGHTWALL, NARROW_RIGHTWALL_PRESSED, [this](){ narrowRightWall(); }, buttonPanel);
-        Button *unNarrowRightWallBtn = new Button(buttonWidth, buttonHeight, UNNARROW_RIGHTWALL, UNNARROW_RIGHTWALL_PRESSED, [this](){ unNarrowRightWall(); }, buttonPanel);
+        Button *addCirclitBtn        = new Button(buttonWidth, buttonHeight, ADD_CIRCLIT, ADD_CIRCLIT_PRESSED, [this](){ reactorCanvas_->addCirclit(); }, buttonPanel);
+        Button *addQuadritBtn        = new Button(buttonWidth, buttonHeight, ADD_QUADRIT, ADD_QUADRIT_PRESSED, [this](){ reactorCanvas_->addQuadrit(); }, buttonPanel);
+        Button *removeMoleculeBtn    = new Button(buttonWidth, buttonHeight, REMOVE_MOLECULE, REMOVE_MOLECULE_PRESSED, [this](){ reactorCanvas_->removeMolecule(); }, buttonPanel);
+        Button *narrowRightWallBtn   = new Button(buttonWidth, buttonHeight, NARROW_RIGHTWALL, NARROW_RIGHTWALL_PRESSED, [this](){ reactorCanvas_->narrowRightWall(); }, buttonPanel);
+        Button *unNarrowRightWallBtn = new Button(buttonWidth, buttonHeight, UNNARROW_RIGHTWALL, UNNARROW_RIGHTWALL_PRESSED, [this](){ reactorCanvas_->unNarrowRightWall(); }, buttonPanel);
 
         std::vector<Button *> buttons = 
         {
@@ -302,38 +347,23 @@ private:
 public:
     ReactorGUI(int reactorUpdateDelayMS=40): 
         Window(REACTOR_GUI_WIDTH, REACTOR_GUI_HEIGHT),
-        reactorUpdateDelayMS_(reactorUpdateDelayMS),
-        reactorModel_(REACTOR_CANVAS_WIDTH, REACTOR_CANVAS_HEIGHT, nullptr, std::nullopt) 
+        reactorUpdateDelayMS_(reactorUpdateDelayMS)
     {
-       
-        int REACTOR_MODEL_WIDTH = REACTOR_CANVAS_WIDTH;
-        int REACTOR_MODEL_HEIGHT = REACTOR_CANVAS_HEIGHT;
+        
+        ReactorVisibleArea *reactorVisibleArea = new ReactorVisibleArea(REACTOR_CANVAS_WIDTH, REACTOR_CANVAS_HEIGHT, this);
+        reactorCanvas_ = new ReactorCanvas(REACTOR_CANVAS_WIDTH, REACTOR_CANVAS_HEIGHT, reactorVisibleArea);
+        
+        
+        reactorVisibleArea->addWidget(0, 0, reactorCanvas_);
+        reactorModel_ = reactorCanvas_->reactorModel();
+
     
-        ReactorVisibleArea_ = new ReactorVisibleArea(REACTOR_CANVAS_WIDTH, REACTOR_CANVAS_HEIGHT, 
-                                                     reactorModel_, this);
-        
-        addWidget(BORDER_SIZE, BORDER_SIZE, ReactorVisibleArea_);
-
-        int buttonPanelWidth    =  REACTOR_GUI_WIDTH - 2 * BORDER_SIZE;
-        
-        int buttonPanelHeight   = REACTOR_GUI_HEIGHT - REACTOR_CANVAS_HEIGHT - 3 * BORDER_SIZE;
-       
-
+        int buttonPanelWidth   = REACTOR_GUI_WIDTH - 2 * BORDER_SIZE;
+        int buttonPanelHeight  = REACTOR_GUI_HEIGHT - REACTOR_CANVAS_HEIGHT - 3 * BORDER_SIZE;
         Container *ButtonPanel = createReactorButtonPanel(buttonPanelWidth, buttonPanelHeight);
-
+    
+        addWidget(BORDER_SIZE, BORDER_SIZE, reactorVisibleArea);
         addWidget(BORDER_SIZE, BORDER_SIZE * 2 + REACTOR_CANVAS_HEIGHT, ButtonPanel);
-    }
-
-    void updateReactor(int deltaMS) {
-        static int passedDeltaMS = 0;
-
-        passedDeltaMS += deltaMS;
-
-        if (passedDeltaMS >= reactorUpdateDelayMS_) {
-            reactorModel_.update(double(reactorUpdateDelayMS_) / SEC_TO_MS);
-            ReactorVisibleArea_->setRecalcState();
-            passedDeltaMS -= reactorUpdateDelayMS_;
-        }
     }
 
     void renderSelfAction(SDL_Renderer* renderer) override {
@@ -344,20 +374,16 @@ public:
         SDL_RenderFillRect(renderer, &full);
     }
 
-    void addCirclit() {
-        reactorModel_.addCirclit();
-    }
-    void addQuadrit() {
-        reactorModel_.addQuadrit();
-    }
-    void removeMolecule() {
-        reactorModel_.removeMolecule();
-    }
-    void narrowRightWall() {
-        reactorModel_.narrowRightWall(NARROWING_DELTA);
-    }
-    void unNarrowRightWall() {
-        reactorModel_.narrowRightWall(-NARROWING_DELTA);
+     void updateReactor(int deltaMS) {
+        static int passedDeltaMS = 0;
+
+        passedDeltaMS += deltaMS;
+
+        if (passedDeltaMS >= reactorUpdateDelayMS_) {
+            reactorModel_->update(double(reactorUpdateDelayMS_) / SEC_TO_MS);
+            reactorCanvas_->setRecalcFlag();
+            passedDeltaMS -= reactorUpdateDelayMS_;
+        }
     }
     int reactorUpdateDelayMS() const { return reactorUpdateDelayMS_; }
 
