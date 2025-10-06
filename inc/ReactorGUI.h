@@ -1,5 +1,5 @@
-#ifndef ReactorView_H
-#define ReactorView_H
+#ifndef REACTOR_GUI_H
+#define REACTOR_GUI_H
 
 #include "MyGUI.h"
 #include "ReactorModel.h"
@@ -7,6 +7,8 @@
 
 const SDL_Color CIRCLIT_COLOR = {255, 0, 0, 255};
 const SDL_Color QUADRIT_COLOR = {0, 0, 255, 255};
+const SDL_Color REACTOR_COLOR = {220, 220, 220, 255};
+
 const double NARROWING_DELTA = 10;
 const int SEC_TO_MS = 1000;
 
@@ -79,6 +81,12 @@ public:
         Container(width, height, parent),
         reactorModel_(reactorModel)
     {}
+
+    ~ReactorView() override {
+        for (Widget *child : children_) delete child;
+    
+        for (MGShape *shape : geomPrimitives_) delete shape;
+    }
 
     void setRecalcState() { needReCalc_ = true; }
 
@@ -155,6 +163,8 @@ public:
             shape->draw(renderer);
         }
     }
+
+
 };
 
 class ReactorCanvas : public Container {
@@ -179,7 +189,7 @@ public:
     void renderSelfAction(SDL_Renderer* renderer) override {
         assert(renderer);
 
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); 
+        SDL_SetRenderDrawColor(renderer, REACTOR_COLOR.r, REACTOR_COLOR.g, REACTOR_COLOR.b, REACTOR_COLOR.a); 
         SDL_Rect full = {0, 0, rect_.w, rect_.h};
         SDL_RenderFillRect(renderer, &full);
     }
@@ -187,12 +197,12 @@ public:
 };
 
 class ReactorGUI : public Window {
-    static constexpr const int BORDER_SIZE = 10;
-    static constexpr const int REACTOR_GUI_HEIGHT = 400;
+    static constexpr const int BORDER_SIZE = 20;
+    static constexpr const int REACTOR_GUI_HEIGHT = 450;
     static constexpr const int REACTOR_GUI_WIDTH = 350;
 
     static constexpr const int REACTOR_CANVAS_HEIGHT = 300;
-    static constexpr const int REACTOR_CANVAS_WIDTH = REACTOR_GUI_WIDTH - 3 * BORDER_SIZE;
+    static constexpr const int REACTOR_CANVAS_WIDTH = REACTOR_GUI_WIDTH - 2 * BORDER_SIZE;
 
     static constexpr const char NARROW_RIGHTWALL[] = "images/NarrowRightWall.png";
     static constexpr const char NARROW_RIGHTWALL_PRESSED[] = "images/NarrowRightWallPressed.png";
@@ -291,7 +301,7 @@ public:
     void renderSelfAction(SDL_Renderer* renderer) override {
         assert(renderer);
 
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); 
+        SDL_SetRenderDrawColor(renderer, REACTOR_COLOR.r, REACTOR_COLOR.g, REACTOR_COLOR.b, REACTOR_COLOR.a); 
         SDL_Rect full = {0, 0, rect_.w, rect_.h};
         SDL_RenderFillRect(renderer, &full);
     }
@@ -316,4 +326,4 @@ public:
 };
 
 
-#endif // ReactorView_H
+#endif // REACTOR_GUI_H
