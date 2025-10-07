@@ -17,16 +17,18 @@ class ClockWindow : public Window {
 
     static constexpr const SDL_Color TEXT_COLOR = {0, 0, 0, 255};
 
+    int currentTimeMS_ = 0;
     int length_ = 0;
     int clockRadius_ = 0;
     gm_dot<int, 2> clockCenter_ = {};
 
     TTF_Font* font_ = nullptr;
-    
+
     SDL_Texture* topNumber_      = nullptr;
     SDL_Texture* bottomNumber_   = nullptr;
     SDL_Texture* leftNumber_     = nullptr;
     SDL_Texture* rightNumber_    = nullptr;
+    SDL_Texture* dialTexture_    = nullptr;
 
 private:
     void drawClockMarks(SDL_Renderer* renderer) {
@@ -68,9 +70,9 @@ private:
 
     void initNumberTextures(SDL_Renderer* renderer) {
         topNumber_      = createFontTexture(font_, TOP_NUMBER_TEXT_, FONT_SIZE, TEXT_COLOR, renderer);
-        bottomNumber_   = createFontTexture(font_, RIGHT_NUMBER_TEXT_, FONT_SIZE, TEXT_COLOR, renderer);
-        leftNumber_     = createFontTexture(font_, BOTTOM_NUMBER_TEXT_, FONT_SIZE, TEXT_COLOR, renderer);
-        rightNumber_    = createFontTexture(font_, LEFT_NUMBER_TEXT_, FONT_SIZE, TEXT_COLOR, renderer);
+        bottomNumber_   = createFontTexture(font_, BOTTOM_NUMBER_TEXT_, FONT_SIZE, TEXT_COLOR, renderer);
+        leftNumber_     = createFontTexture(font_, LEFT_NUMBER_TEXT_, FONT_SIZE, TEXT_COLOR, renderer);
+        rightNumber_    = createFontTexture(font_, RIGHT_NUMBER_TEXT_, FONT_SIZE, TEXT_COLOR, renderer);
 
         assert(topNumber_);
         assert(bottomNumber_);
@@ -78,6 +80,51 @@ private:
         assert(rightNumber_);
     }
 
+    void initDialTexture(SDL_Renderer* renderer) {
+        dialTexture_ = SDL_CreateTexture(
+            renderer,
+            SDL_PIXELFORMAT_RGBA8888,
+            SDL_TEXTUREACCESS_TARGET,
+            length_,
+            length_
+        );
+
+        SDL_Texture* prevTarget = SDL_GetRenderTarget(renderer);
+        SDL_SetRenderTarget(renderer, dialTexture_);
+
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+        SDL_RenderClear(renderer);
+
+        SDL_SetRenderDrawColor(renderer, DEFAULT_WINDOW_COLOR.r, DEFAULT_WINDOW_COLOR.g, DEFAULT_WINDOW_COLOR.b, DEFAULT_WINDOW_COLOR.a); 
+        SDL_Rect full = {0, 0, rect_.w, rect_.h};
+        SDL_RenderFillRect(renderer, &full);
+        
+    
+        filledCircleColor(renderer, length_ / 2, length_ / 2, clockRadius_, SDL2gfxColorToUint32(WHITE_SDL_COLOR));
+        circleColor(renderer, length_ / 2, length_ / 2, clockRadius_, SDL2gfxColorToUint32(BLACK_SDL_COLOR));
+
+        drawClockMarks(renderer);
+
+        initNumberTextures(renderer);
+        drawClockNumbers(renderer);
+
+        SDL_SetRenderTarget(renderer, prevTarget);
+    }   
+
+    void drawClockHand(SDL_Renderer* renderer) {
+        gm_vector<double, 2> clockHand = {0, -1};
+        clockHand = clockHand * clockRadius_;
+        clockHand = clockHand.rotate((double) currentTimeMS_ / (60 * SEC_TO_MS) * 2 * M_PI);
+    
+        double x1 = length_ / 2;
+        double y1 = length_ / 2;
+        double x2 = x1 + clockHand.get_x();
+        double y2 = y1 + clockHand.get_y();
+
+        SDL_SetRenderDrawColor(renderer, BLACK_SDL_COLOR.r, BLACK_SDL_COLOR.g, BLACK_SDL_COLOR.b, BLACK_SDL_COLOR.a);
+        SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+    }
 
 public:
     ClockWindow(int length, const char fontPath[], Widget *parent=nullptr): Window(length, length, parent), length_(length) {
@@ -98,26 +145,23 @@ public:
     void renderSelfAction(SDL_Renderer* renderer) override {
         assert(renderer);
     
-        static bool initNumberTexturesFlag = true;
+        static bool initDialTextureFlag = true;
         
-        if (initNumberTexturesFlag) {
-            initNumberTextures(renderer);
-            initNumberTexturesFlag = false;
+        if (initDialTextureFlag) {
+            initDialTexture(renderer);
+            initDialTextureFlag = false;
         }
-        
-        
 
-        SDL_SetRenderDrawColor(renderer, DEFAULT_WINDOW_COLOR.r, DEFAULT_WINDOW_COLOR.g, DEFAULT_WINDOW_COLOR.b, DEFAULT_WINDOW_COLOR.a); 
-        SDL_Rect full = {0, 0, rect_.w, rect_.h};
-        SDL_RenderFillRect(renderer, &full);
+        SDL_Rect dst = {0, 0, length_, length_};
+        SDL_RenderCopy(renderer, dialTexture_, NULL, &dst);
+    
+        drawClockHand(renderer);
+    }
 
-
-        filledCircleColor(renderer, length_ / 2, length_ / 2, clockRadius_, SDL2gfxColorToUint32(WHITE_SDL_COLOR));
-        circleColor(renderer, length_ / 2, length_ / 2, clockRadius_, SDL2gfxColorToUint32(BLACK_SDL_COLOR));
-
-        drawClockMarks(renderer);
-
-        drawClockNumbers(renderer);
+    void updateClock(double deltaMS) {
+        currentTimeMS_ += deltaMS;
+        currentTimeMS_ = std::clamp(currentTimeMS_, 0, 60 * SEC_TO_MS);
+        setRerenderFlag();
     }
 };
 

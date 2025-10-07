@@ -68,7 +68,10 @@ int main() {
     mainWindow->addWidget(3 * APP_BORDER_SZ + REACTOR_GUI_SZ.x + PLOT_SZ.x, APP_BORDER_SZ, clockWindow);
 
   
-    application.addUserEvent([&reactorGUI](int deltaMS) { reactorGUI->updateReactor(deltaMS); });
+    application.addUserEvent([reactorGUI, clockWindow](int deltaMS) { 
+        reactorGUI->updateReactor(deltaMS); 
+        clockWindow->updateClock(deltaMS);
+    });
     
     application.run();
 
