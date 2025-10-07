@@ -13,13 +13,6 @@ const double REACTOR_WALL_TEMPERATURE_COLOR_COEF = 1.0 / 400000;
 const double NARROWING_DELTA = 10;
 const int SEC_TO_MS = 1000;
 
-Uint32 SDLColorToUint32(SDL_Color c) {
-    return ((Uint32)c.r << 24) | 
-           ((Uint32)c.g << 16) | 
-           ((Uint32)c.b << 8)  | 
-           ((Uint32)c.a);
-}
-
 class MGShape {
 protected:
     SDL_Point position_ = {};
@@ -75,7 +68,6 @@ public:
         currentEnergy_ = currentEnergy;
         systemSummaryEnergy_ = systemSummaryEnergy;
         redColorPart = std::clamp((int) (255 * currentEnergy_ * REACTOR_WALL_TEMPERATURE_COLOR_COEF), 0, 255);
-        std::cout << " redColorPart : " << (int) redColorPart << "\n";
         setRerenderFlag();
     }
 
