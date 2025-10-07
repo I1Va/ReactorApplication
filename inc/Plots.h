@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <deque>
+#include <limits>
 
 #include "MyGUI.h"
 
@@ -46,8 +47,9 @@ public:
     RecorderModel(double pixelWidth, double pixelHeight) : pixelWidth_(pixelWidth), pixelHeight_(pixelHeight) {}
 
     void addPoint(double y, unsigned int type) { 
-        double pixelY = y * curScaleY_;
-        
+        if (points_.size() == 0 && std::abs(y) > std::numeric_limits<double>::epsilon())
+            curScaleY_ = pixelHeight_ / y;
+    
         if (points_.size() > pixelWidth_) {
             bool fstPointState = points_.front().state;
             while (points_.size()) {
@@ -56,10 +58,11 @@ public:
                 points_.pop_front();
             }
         }
-    
-        points_.push_back({pixelY, curPointState, type});
         
-        if (pixelY * curScaleY_ > pixelHeight_) curScaleY_ = pixelHeight_ / pixelY;
+        points_.push_back({y, curPointState, type});
+
+        double pixelY = y * curScaleY_;
+        if (pixelY > pixelHeight_) curScaleY_ = pixelHeight_ / y;
     }
 
     void endRecord() { curPointState = !curPointState; }
@@ -81,15 +84,26 @@ public:
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderFillRect(renderer, &widgetRect);
 
-        
         for (int i = 0; i < recorder.points().size(); i++) {
             RecordPoint point = recorder.points()[i];
             SDL_Color pointColor = Uint32ToSDL_Color(point.type);
-        
+
             SDL_SetRenderDrawColor(renderer, pointColor.r, pointColor.g, pointColor.b, pointColor.a);
             SDL_RenderDrawPoint(renderer, i, point.y * recorder.scaleY());
         }
     }
+
+    bool updateSelfAction() override {
+        static double x = 0; 
+        double y = std::sin(x+=0.1);
+
+        addPoint(y + 1, {0, 77, 77, 43});
+        endRecord();
+        setRerenderFlag();
+
+        return true; 
+    }
+
 
     void addPoint(double y, SDL_Color color) { recorder.addPoint(y, SDLColorToUint32(color)); }
     void endRecord() { recorder.endRecord(); }

@@ -7,7 +7,6 @@
 
 const SDL_Color CIRCLIT_COLOR = {255, 0, 0, 255};
 const SDL_Color QUADRIT_COLOR = {0, 0, 255, 255};
-const SDL_Color REACTOR_COLOR = {220, 220, 220, 255}; 
 const int REACTOR_WALL_WIDTH = 10;
 const double REACTOR_WALL_TEMPERATURE_COLOR_COEF = 1.0 / 400000;
 const double NARROWING_DELTA = 10;
@@ -230,7 +229,7 @@ public:
     void renderSelfAction(SDL_Renderer* renderer) override {
         assert(renderer);
         
-        showInfo();
+        // showInfo();
 
         SDL_Rect widgetRect = {0, 0, rect_.w, rect_.h};
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // MGCanvas BACKGROUND COLOR
@@ -272,7 +271,7 @@ public:
     void renderSelfAction(SDL_Renderer* renderer) override {
         assert(renderer);
 
-        SDL_SetRenderDrawColor(renderer, REACTOR_COLOR.r, REACTOR_COLOR.g, REACTOR_COLOR.b, REACTOR_COLOR.a); 
+        SDL_SetRenderDrawColor(renderer, DEFAULT_WINDOW_COLOR.r, DEFAULT_WINDOW_COLOR.g, DEFAULT_WINDOW_COLOR.b, DEFAULT_WINDOW_COLOR.a); 
         SDL_Rect full = {0, 0, rect_.w, rect_.h};
         SDL_RenderFillRect(renderer, &full);
     }
@@ -370,7 +369,7 @@ public:
     void renderSelfAction(SDL_Renderer* renderer) override {
         assert(renderer);
 
-        SDL_SetRenderDrawColor(renderer, REACTOR_COLOR.r, REACTOR_COLOR.g, REACTOR_COLOR.b, REACTOR_COLOR.a); 
+        SDL_SetRenderDrawColor(renderer, DEFAULT_WINDOW_COLOR.r, DEFAULT_WINDOW_COLOR.g, DEFAULT_WINDOW_COLOR.b, DEFAULT_WINDOW_COLOR.a); 
         SDL_Rect full = {0, 0, rect_.w, rect_.h};
         SDL_RenderFillRect(renderer, &full);
     }
