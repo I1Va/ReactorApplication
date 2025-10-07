@@ -120,5 +120,22 @@ public:
     void endRecord() { recorder_.endRecord(); }
 };
 
+class RecorderWindow : public Window {
+    RecorderWidget *recorder_;
+
+public:
+    RecorderWindow(int height, int width, Widget *parent=nullptr): Window(height, width, parent) {
+        recorder_ = new RecorderWidget(width - 2 * WINDOW_BORDER_SIZE, height - 2 * WINDOW_BORDER_SIZE, this);
+        addWidget(WINDOW_BORDER_SIZE, WINDOW_BORDER_SIZE, recorder_);
+    }
+
+    void addPoint(double y, SDL_Color color) { 
+        recorder_->addPoint(y, color); 
+        recorder_->setRerenderFlag();
+    }
+
+    void endRecord() { recorder_->endRecord(); }
+};
+
 
 #endif // PLOTS_H

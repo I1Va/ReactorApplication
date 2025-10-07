@@ -12,6 +12,20 @@ const double REACTOR_WALL_TEMPERATURE_COLOR_COEF = 1.0 / 400000;
 const double NARROWING_DELTA = 10;
 const int SEC_TO_MS = 1000;
 
+struct buttonTexturePath {
+    const char *unpressed;
+    const char *pressed;
+};
+
+struct ReactorButtonTexturePack {
+    
+    buttonTexturePath narrowRightWallBtnPath;
+    buttonTexturePath unNarrowRightWallBtnPath;
+    buttonTexturePath addCirclitBtnPath;
+    buttonTexturePath addQuadritBtnPath;
+    buttonTexturePath removeMoleculeBtnPath;
+};
+
 class MGShape {
 protected:
     SDL_Point position_ = {};
@@ -282,17 +296,6 @@ public:
 class ReactorGUI : public Window {
     static constexpr const double REACTOR_CANVAS_SHARE = 0.75;
 
-    static constexpr const char NARROW_RIGHTWALL[] = "images/NarrowRightWall.png";
-    static constexpr const char NARROW_RIGHTWALL_PRESSED[] = "images/NarrowRightWallPressed.png";
-    static constexpr const char UNNARROW_RIGHTWALL[] = "images/UnNarrowRightWall.png";
-    static constexpr const char UNNARROW_RIGHTWALL_PRESSED[] = "images/UnNarrowRightWalPressed.png";
-
-    static constexpr const char ADD_CIRCLIT_PRESSED[] = "images/addCirclitPressed.png";
-    static constexpr const char ADD_CIRCLIT[] = "images/addCirclitUnPressed.png";
-    static constexpr const char ADD_QUADRIT_PRESSED[] = "images/addQuadritPressed.png";
-    static constexpr const char ADD_QUADRIT[] = "images/addQuadritUnPressed.png";
-    static constexpr const char REMOVE_MOLECULE[] = "images/removeMolecule.png";
-    static constexpr const char REMOVE_MOLECULE_PRESSED[] = "images/removeMoleculePressed.png";
 
     int reactorCanvasWidth_ = 0;
     int reactorCanvasHeight_ = 0;
@@ -300,6 +303,8 @@ class ReactorGUI : public Window {
     int buttonPanelHeight_ = 0;
 
     int reactorUpdateDelayMS_;
+
+    ReactorButtonTexturePack texturePack_ = {};
 
     ReactorModel *reactorModel_ = nullptr;
     ReactorCanvas *reactorCanvas_ = nullptr;
@@ -315,11 +320,25 @@ private:
         Container *buttonPanel = new Container(width, height, this);
         
        
-        Button *addCirclitBtn        = new Button(buttonWidth, buttonHeight, ADD_CIRCLIT, ADD_CIRCLIT_PRESSED, [this](){ reactorCanvas_->addCirclit(); }, buttonPanel);
-        Button *addQuadritBtn        = new Button(buttonWidth, buttonHeight, ADD_QUADRIT, ADD_QUADRIT_PRESSED, [this](){ reactorCanvas_->addQuadrit(); }, buttonPanel);
-        Button *removeMoleculeBtn    = new Button(buttonWidth, buttonHeight, REMOVE_MOLECULE, REMOVE_MOLECULE_PRESSED, [this](){ reactorCanvas_->removeMolecule(); }, buttonPanel);
-        Button *narrowRightWallBtn   = new Button(buttonWidth, buttonHeight, NARROW_RIGHTWALL, NARROW_RIGHTWALL_PRESSED, [this](){ reactorCanvas_->narrowRightWall(); }, buttonPanel);
-        Button *unNarrowRightWallBtn = new Button(buttonWidth, buttonHeight, UNNARROW_RIGHTWALL, UNNARROW_RIGHTWALL_PRESSED, [this](){ reactorCanvas_->unNarrowRightWall(); }, buttonPanel);
+        Button *addCirclitBtn        = new Button(buttonWidth, buttonHeight, 
+                                                  texturePack_.addCirclitBtnPath.unpressed , texturePack_.addCirclitBtnPath.pressed, 
+                                                  [this](){ reactorCanvas_->addCirclit(); }, buttonPanel);
+        
+        Button *addQuadritBtn        = new Button(buttonWidth, buttonHeight, 
+                                                  texturePack_.addQuadritBtnPath.unpressed , texturePack_.addQuadritBtnPath.pressed,
+                                                  [this](){ reactorCanvas_->addQuadrit(); }, buttonPanel);
+        
+        Button *removeMoleculeBtn    = new Button(buttonWidth, buttonHeight, 
+                                                  texturePack_.removeMoleculeBtnPath.unpressed , texturePack_.removeMoleculeBtnPath.pressed,
+                                                  [this](){ reactorCanvas_->removeMolecule(); }, buttonPanel);
+                                                
+        Button *narrowRightWallBtn   = new Button(buttonWidth, buttonHeight, 
+                                                  texturePack_.narrowRightWallBtnPath.unpressed, texturePack_.narrowRightWallBtnPath.pressed,
+                                                  [this](){ reactorCanvas_->narrowRightWall(); }, buttonPanel);
+                                                
+        Button *unNarrowRightWallBtn = new Button(buttonWidth, buttonHeight, 
+                                                  texturePack_.unNarrowRightWallBtnPath.unpressed, texturePack_.unNarrowRightWallBtnPath.pressed, 
+                                                  [this](){ reactorCanvas_->unNarrowRightWall(); }, buttonPanel);
 
         std::vector<Button *> buttons = 
         {
@@ -346,8 +365,9 @@ private:
     }
 
 public:
-    ReactorGUI(int width, int height, std::function<void()> onReactorUpdate=nullptr, int reactorUpdateDelayMS=40): 
+    ReactorGUI(int width, int height, ReactorButtonTexturePack texturePack, std::function<void()> onReactorUpdate=nullptr, int reactorUpdateDelayMS=40): 
         Window(width, height),
+        texturePack_(texturePack),
         reactorUpdateDelayMS_(reactorUpdateDelayMS)
     {
         reactorCanvasWidth_ = width - 2 * WINDOW_BORDER_SIZE;

@@ -16,22 +16,13 @@ const int CLOCK_WINDOW_LENGTH = 200;
 
 const char FONT_PATH[] = "fonts/Roboto/RobotoFont.ttf";
 
-
-class RecorderWindow : public Window {
-    RecorderWidget *recorder_;
-
-public:
-    RecorderWindow(int height, int width, Widget *parent=nullptr): Window(height, width, parent) {
-        recorder_ = new RecorderWidget(width - 2 * WINDOW_BORDER_SIZE, height - 2 * WINDOW_BORDER_SIZE, this);
-        addWidget(WINDOW_BORDER_SIZE, WINDOW_BORDER_SIZE, recorder_);
-    }
-
-    void addPoint(double y, SDL_Color color) { 
-        recorder_->addPoint(y, color); 
-        recorder_->setRerenderFlag();
-    }
-
-    void endRecord() { recorder_->endRecord(); }
+const ReactorButtonTexturePack reactorButtonTexturePack = 
+{
+    .narrowRightWallBtnPath     = {"images/NarrowRightWall.png", "images/NarrowRightWallPressed.png"},
+    .unNarrowRightWallBtnPath   = {"images/UnNarrowRightWall.png", "images/addCirclitPressed.png"},
+    .addCirclitBtnPath          = {"images/addCirclitUnPressed.png", "images/addCirclitPressed.png"},
+    .addQuadritBtnPath          = {"images/addQuadritUnPressed.png", "images/addQuadritPressed.png"},
+    .removeMoleculeBtnPath      = {"images/removeMolecule.png", "images/removeMoleculePressed.png"}
 };
 
 int main() {
@@ -46,7 +37,7 @@ int main() {
     RecorderWindow *energyRecorder = new RecorderWindow(PLOT_SZ.x, PLOT_SZ.y, mainWindow);
     mainWindow->addWidget(REACTOR_GUI_SZ.x + 2 * APP_BORDER_SZ, PLOT_SZ.y + 2 * APP_BORDER_SZ, energyRecorder);
 
-    ReactorGUI *reactorGUI = new ReactorGUI(REACTOR_GUI_SZ.x, REACTOR_GUI_SZ.y, nullptr, 40);
+    ReactorGUI *reactorGUI = new ReactorGUI(REACTOR_GUI_SZ.x, REACTOR_GUI_SZ.y, reactorButtonTexturePack, nullptr, 40);
     reactorGUI->setReactorOnUpdate(
         [reactorGUI, moleculesRecorder, energyRecorder] {
             int reactorCirclitCount = reactorGUI->getReactorCirclitCount();
