@@ -7,10 +7,9 @@
 
 const SDL_Color CIRCLIT_COLOR = {255, 0, 0, 255};
 const SDL_Color QUADRIT_COLOR = {0, 0, 255, 255};
-const SDL_Color REACTOR_COLOR = {220, 220, 220, 255};
-const SDL_Color REACTOR_WALL_COLOR = {150, 150, 150, 255};
+const SDL_Color REACTOR_COLOR = {220, 220, 220, 255}; 
 const int REACTOR_WALL_WIDTH = 10;
-
+const double REACTOR_WALL_TEMPERATURE_COLOR_COEF = 1.0 / 400000;
 const double NARROWING_DELTA = 10;
 const int SEC_TO_MS = 1000;
 
@@ -67,16 +66,16 @@ public:
 class ReactorWallWidget : public Widget {
     double currentEnergy_ = 1;
     double systemSummaryEnergy_ = 1;
-    SDL_Color wallStartColor_ = {};
     Uint8 redColorPart = 0;
 
 public:
-    ReactorWallWidget(int width, int height, SDL_Color wallColor, Widget *parent=nullptr): Widget(width, height, parent), wallStartColor_(wallColor) {}
+    ReactorWallWidget(int width, int height, Widget *parent=nullptr): Widget(width, height, parent) {}
 
     void setWallEnergyPair(double currentEnergy, double systemSummaryEnergy) {
         currentEnergy_ = currentEnergy;
         systemSummaryEnergy_ = systemSummaryEnergy;
-        redColorPart = std::max((Uint8) 255,  (Uint8) (wallStartColor_.r + (255 * currentEnergy_ / systemSummaryEnergy_)));
+        redColorPart = std::clamp((int) (255 * currentEnergy_ * REACTOR_WALL_TEMPERATURE_COLOR_COEF), 0, 255);
+        std::cout << " redColorPart : " << (int) redColorPart << "\n";
         setRerenderFlag();
     }
 
@@ -84,7 +83,7 @@ public:
         assert(renderer);
 
         SDL_Rect widgetRect = {0, 0, rect_.w, rect_.h};
-        SDL_SetRenderDrawColor(renderer, redColorPart, wallStartColor_.g, wallStartColor_.b, wallStartColor_.a);
+        SDL_SetRenderDrawColor(renderer, redColorPart, 0, 0, 255);
         SDL_RenderFillRect(renderer, &widgetRect);
     }
 };
@@ -124,10 +123,10 @@ private:
     }
     
     void createReactorWalls() {
-        leftWall   = new ReactorWallWidget(0, 0, REACTOR_WALL_COLOR, this);
-        rightWall  = new ReactorWallWidget(0, 0, REACTOR_WALL_COLOR, this);
-        topWall    = new ReactorWallWidget(0, 0, REACTOR_WALL_COLOR, this);
-        bottomWall = new ReactorWallWidget(0, 0, REACTOR_WALL_COLOR, this);
+        leftWall   = new ReactorWallWidget(0, 0, this);
+        rightWall  = new ReactorWallWidget(0, 0, this);
+        topWall    = new ReactorWallWidget(0, 0, this);
+        bottomWall = new ReactorWallWidget(0, 0, this);
 
     
         addWidget(0, 0, leftWall);
@@ -194,11 +193,21 @@ public:
         needReCalc_ = false;
     }
 
+    void recalculateWallsEnergy() {
+        leftWall->setWallEnergyPair(reactorModel_.getReactorWalls()[LEFT_WALL].energy, reactorModel_.getSummaryEnergy());
+        rightWall->setWallEnergyPair(reactorModel_.getReactorWalls()[RIGHT_WALL].energy, reactorModel_.getSummaryEnergy());
+        bottomWall->setWallEnergyPair(reactorModel_.getReactorWalls()[BOTTOM_WALL].energy, reactorModel_.getSummaryEnergy());
+        topWall->setWallEnergyPair(reactorModel_.getReactorWalls()[TOP_WALL].energy, reactorModel_.getSummaryEnergy());
+    }
+
     bool updateSelfAction() override {
         if (!(needReCalc_ || needReSize_)) return false;
 
         if (needReSize_) recalculateReactorCanvasSize();
-        if (needReCalc_) recalculateMoleculePrimitives();
+        if (needReCalc_) {
+            recalculateMoleculePrimitives();
+            recalculateWallsEnergy();
+        }
         
         setRerenderFlag();
 
@@ -206,31 +215,31 @@ public:
     }
 
     void showInfo() {
-        double summaryEnergy = 0;
-        for (auto molecule : reactorModel_.getMolecules()) {
-            summaryEnergy += molecule->getKinecticEnergy() + molecule->getPotentialEnergy();
-        }
-    
+        std::cout << "SummaryEnergy : " << reactorModel_.getSummaryEnergy() << "\n";
+        
         for (size_t i = 0; i < 4; i++) {
             std::cout << "wall[" << i << "].energy = " << reactorModel_.getReactorWalls()[i].energy << ", ";
         }
+        std::cout << "\n\n";
 
-        std::cout << "\nsystemEnergy : " << summaryEnergy << "\n";
-        for (size_t i = 0; i < 4; i++) {
-            std::cout << "wall[" << i << "].energy = " << reactorModel_.getReactorWalls()[i].energy << ", ";
-        }
+        // std::cout << "\nsystemEnergy : " << summaryEnergy << "\n";
+        // for (size_t i = 0; i < 4; i++) {
+        //     std::cout << "wall[" << i << "].energy = " << reactorModel_.getReactorWalls()[i].energy << ", ";
+        // }
 
         // for (auto molecule : reactorModel_.getMolecules()) {
         //     std::cout << molecule->getPosition() << " ";
         // }
         // std::cout << "\n";
     
-        std::cout << "\n\n";
+        // std::cout << "\n\n";
     }
 
     void renderSelfAction(SDL_Renderer* renderer) override {
         assert(renderer);
-    
+        
+        showInfo();
+
         SDL_Rect widgetRect = {0, 0, rect_.w, rect_.h};
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // MGCanvas BACKGROUND COLOR
         SDL_RenderFillRect(renderer, &widgetRect);
