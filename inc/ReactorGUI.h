@@ -11,7 +11,7 @@ const int REACTOR_WALL_WIDTH = 10;
 const double REACTOR_WALL_TEMPERATURE_COLOR_COEF = 1.0 / 400000;
 const double NARROWING_DELTA = 10;
 const int SEC_TO_MS = 1000;
-
+const int EXPLODE_PARTICLES_NUM = 100;
 struct buttonTexturePath {
     const char *unpressed;
     const char *pressed;
@@ -24,6 +24,13 @@ struct ReactorButtonTexturePack {
     buttonTexturePath addCirclitBtnPath;
     buttonTexturePath addQuadritBtnPath;
     buttonTexturePath removeMoleculeBtnPath;
+
+    buttonTexturePath heatTopWallBtnPath; 
+    buttonTexturePath heatBottomWallBtnPath;  
+    buttonTexturePath heatLeftWallBtnPath;
+    buttonTexturePath heatRightWallBtnPath;
+
+    buttonTexturePath explodeReactorBtnPath;
 };
 
 class MGShape {
@@ -48,7 +55,6 @@ public:
 
     void draw(SDL_Renderer* renderer) const override {
         RendererGuard rendererGuard(renderer);
-        
         filledCircleColor(renderer, (Sint16) position_.x, (Sint16) position_.y, (Sint16) radius_, SDL2gfxColorToUint32(color_));
     }
 };
@@ -96,6 +102,7 @@ public:
 class ReactorCanvas : public Container {
     bool needReCalc_ = false;
     bool needReSize_ = false;
+    bool needExplode_ = false;
     
     int reactorWidth_;
     int reactorHeight_;
@@ -142,6 +149,13 @@ private:
         addWidget(0, 0, rightWall);
 
         recalculateReactorCanvasSize();
+    }
+
+    void explodeReactor(SDL_Renderer* renderer) { 
+        for (int i = 0; i < EXPLODE_PARTICLES_NUM; i++) {
+            addCirclit();
+        }
+        needExplode_ = false;
     }
 
 public:
@@ -245,7 +259,7 @@ public:
         assert(renderer);
         
         // showInfo();
-
+        if (needExplode_) { explodeReactor(renderer); }
         SDL_Rect widgetRect = {0, 0, rect_.w, rect_.h};
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // MGCanvas BACKGROUND COLOR
         SDL_RenderFillRect(renderer, &widgetRect);
@@ -275,6 +289,13 @@ public:
         
         setUpdateSizeFlag();
     }
+
+    void heatTopWall() { reactorModel_.addEnergyToWall(TOP_WALL, /*percantage*/ 5); }
+    void heatRightWall() { reactorModel_.addEnergyToWall(RIGHT_WALL, /*percantage*/ 5); }
+    void heatLeftWall() { reactorModel_.addEnergyToWall(LEFT_WALL, /*percantage*/ 5); }
+    void heatBottomWall() { reactorModel_.addEnergyToWall(BOTTOM_WALL, /*percantage*/ 5); }
+    
+    void setExplodeReactorFlag() { needExplode_ = true; }
 };
 
 class ReactorVisibleArea : public Container {
@@ -339,6 +360,26 @@ private:
         Button *unNarrowRightWallBtn = new Button(buttonWidth, buttonHeight, 
                                                   texturePack_.unNarrowRightWallBtnPath.unpressed, texturePack_.unNarrowRightWallBtnPath.pressed, 
                                                   [this](){ reactorCanvas_->unNarrowRightWall(); }, buttonPanel);
+        
+        Button *heatTopWallBtn          = new Button(buttonWidth, buttonHeight, 
+                                                  texturePack_.heatTopWallBtnPath.unpressed , texturePack_.heatTopWallBtnPath.pressed, 
+                                                  [this](){ reactorCanvas_->heatTopWall(); }, buttonPanel);
+        
+        Button *heatBottomWallBtn       = new Button(buttonWidth, buttonHeight, 
+                                                  texturePack_.heatBottomWallBtnPath.unpressed , texturePack_.heatBottomWallBtnPath.pressed,
+                                                  [this](){ reactorCanvas_->heatBottomWall(); }, buttonPanel);
+        
+        Button *heatLeftWallBtn         = new Button(buttonWidth, buttonHeight, 
+                                                  texturePack_.heatLeftWallBtnPath.unpressed , texturePack_.heatLeftWallBtnPath.pressed,
+                                                  [this](){ reactorCanvas_->heatLeftWall(); }, buttonPanel);
+                                                
+        Button *heatRighttWallBtn       = new Button(buttonWidth, buttonHeight, 
+                                                  texturePack_.heatRightWallBtnPath.unpressed, texturePack_.heatRightWallBtnPath.pressed,
+                                                  [this](){ reactorCanvas_->heatRightWall(); }, buttonPanel);
+                                                
+        Button *explodeReactorBtn       = new Button(buttonWidth, buttonHeight, 
+                                                  texturePack_.explodeReactorBtnPath.unpressed, texturePack_.explodeReactorBtnPath.pressed, 
+                                                  [this](){ reactorCanvas_->setExplodeReactorFlag(); }, buttonPanel);
 
         std::vector<Button *> buttons = 
         {
@@ -346,19 +387,25 @@ private:
             addQuadritBtn,
             removeMoleculeBtn,
             narrowRightWallBtn,
-            unNarrowRightWallBtn
+            unNarrowRightWallBtn,
+
+            heatTopWallBtn,
+            heatBottomWallBtn,    
+            heatLeftWallBtn,
+            heatRighttWallBtn,
+            explodeReactorBtn
         };
 
         int curBtnX = 0;
         int curBtnY = 0;
-    
+        
         for (Button *button : buttons) {
-            buttonPanel->addWidget(curBtnX, curBtnY, button);
-            curBtnX += buttonWidth;
-            if (curBtnX > width) {
+            if (curBtnX >= buttonPanelWidth_) {
                 curBtnX = 0;
                 curBtnY += buttonHeight;
             }
+            buttonPanel->addWidget(curBtnX, curBtnY, button);
+            curBtnX += buttonWidth;
         }
 
         return buttonPanel;

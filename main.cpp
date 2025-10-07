@@ -22,7 +22,14 @@ const ReactorButtonTexturePack reactorButtonTexturePack =
     .unNarrowRightWallBtnPath   = {"images/UnNarrowRightWall.png", "images/addCirclitPressed.png"},
     .addCirclitBtnPath          = {"images/addCirclitUnPressed.png", "images/addCirclitPressed.png"},
     .addQuadritBtnPath          = {"images/addQuadritUnPressed.png", "images/addQuadritPressed.png"},
-    .removeMoleculeBtnPath      = {"images/removeMolecule.png", "images/removeMoleculePressed.png"}
+    .removeMoleculeBtnPath      = {"images/removeMolecule.png", "images/removeMoleculePressed.png"},
+
+    .heatTopWallBtnPath         = {"images/heatTopWall.png", "images/heatTopWallPressed.png"},
+    .heatBottomWallBtnPath      = {"images/heatBottomWall.png", "images/heatBottomWallPressed.png"},
+    .heatLeftWallBtnPath        = {"images/heatLeftWall.png", "images/heatLeftWallPressed.png"},
+    .heatRightWallBtnPath       = {"images/heatRightWall.png", "images/heatRightWallPressed.png"},
+
+    .explodeReactorBtnPath      = {"images/explodeReactor.png", "images/explodeReactorPressed.png"}
 };
 
 int main() {
