@@ -5,14 +5,19 @@
 #include "ReactorGUI.h"
 #include "Plots.h"
 
+const SDL_Color ENERGY_COLOR = {0, 200, 255, 255};
+
 class RecorderWindow : public Window {
-    RecorderWidget *recorder;
+    RecorderWidget *recorder_;
 
 public:
     RecorderWindow(int height, int width, Widget *parent=nullptr): Window(height, width, parent) {
-        recorder = new RecorderWidget(width - 2 * WINDOW_BORDER_SIZE, height - 2 * WINDOW_BORDER_SIZE, this);
-        addWidget(WINDOW_BORDER_SIZE, WINDOW_BORDER_SIZE, recorder);
+        recorder_ = new RecorderWidget(width - 2 * WINDOW_BORDER_SIZE, height - 2 * WINDOW_BORDER_SIZE, this);
+        addWidget(WINDOW_BORDER_SIZE, WINDOW_BORDER_SIZE, recorder_);
     }
+
+    void addPoint(double y, SDL_Color color) { recorder_->addPoint(y, color); }
+    void endRecord() { recorder_->endRecord(); }
 };
 
 int main() {
@@ -21,11 +26,36 @@ int main() {
     Container *mainWindow = new Container(780, 580);
     application.setMainWidget(10, 10, mainWindow);    
 
-    ReactorGUI *reactorGUI = new ReactorGUI(20);
+    RecorderWindow *moleculesRecorder = new RecorderWindow(300, 300, mainWindow);
+    mainWindow->addWidget(400, 0, moleculesRecorder);
+
+    RecorderWindow *energyRecorder = new RecorderWindow(300, 300, mainWindow);
+    mainWindow->addWidget(400, 300, energyRecorder);
+
+
+
+    ReactorGUI *reactorGUI = new ReactorGUI(nullptr, 40);
+    reactorGUI->setReactorOnUpdate(
+        [reactorGUI, moleculesRecorder, energyRecorder] {
+            int reactorCirclitCount = reactorGUI->getReactorCirclitCount();
+            int reactorQuadritCount = reactorGUI->getReactorQuadritCount();
+            double reactorEnergy = reactorGUI->getReactorSummaryEnergy();
+            
+            moleculesRecorder->addPoint(reactorCirclitCount, RED_SDL_COLOR);
+            moleculesRecorder->addPoint(reactorQuadritCount, BLUE_SDL_COLOR);
+            moleculesRecorder->endRecord();
+            moleculesRecorder->setRerenderFlag();
+
+            energyRecorder->addPoint(reactorEnergy, ENERGY_COLOR);
+            energyRecorder->endRecord();
+            energyRecorder->setRerenderFlag();
+        }
+    );
+
+
     mainWindow->addWidget(10, 10, reactorGUI);
 
-    RecorderWindow *circlitRecorder = new RecorderWindow(100, 100, mainWindow);
-    mainWindow->addWidget(400, 400, circlitRecorder);
+   
 
     // for (int i = 0; i < 100; i++) {
     //     reactorGUI->addCirclit();

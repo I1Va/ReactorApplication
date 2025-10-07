@@ -35,7 +35,7 @@ public:
     void draw(SDL_Renderer* renderer) const override {
         RendererGuard rendererGuard(renderer);
         
-        filledCircleColor(renderer, (Sint16) position_.x, (Sint16) position_.y, (Sint16) radius_, SDLColorToUint32(color_));
+        filledCircleColor(renderer, (Sint16) position_.x, (Sint16) position_.y, (Sint16) radius_, SDL2gfxColorToUint32(color_));
     }
 };
 
@@ -134,12 +134,13 @@ public:
     ReactorCanvas
     (
         int width, int height,
+        std::function<void()> onReactorUpdate,
         Widget *parent=nullptr
     ) : 
         Container(width, height, parent),
         reactorWidth_(width - 2 * REACTOR_WALL_WIDTH),
         reactorHeight_(height - 2 * REACTOR_WALL_WIDTH),
-        reactorModel_(reactorWidth_, reactorHeight_)
+        reactorModel_(reactorWidth_, reactorHeight_, onReactorUpdate)
     {
         createReactorWalls();  
     }
@@ -345,13 +346,13 @@ private:
     }
 
 public:
-    ReactorGUI(int reactorUpdateDelayMS=40): 
+    ReactorGUI(std::function<void()> onReactorUpdate=nullptr, int reactorUpdateDelayMS=40): 
         Window(REACTOR_GUI_WIDTH, REACTOR_GUI_HEIGHT),
         reactorUpdateDelayMS_(reactorUpdateDelayMS)
     {
         
         ReactorVisibleArea *reactorVisibleArea = new ReactorVisibleArea(REACTOR_CANVAS_WIDTH, REACTOR_CANVAS_HEIGHT, this);
-        reactorCanvas_ = new ReactorCanvas(REACTOR_CANVAS_WIDTH, REACTOR_CANVAS_HEIGHT, reactorVisibleArea);
+        reactorCanvas_ = new ReactorCanvas(REACTOR_CANVAS_WIDTH, REACTOR_CANVAS_HEIGHT, onReactorUpdate, reactorVisibleArea);
         
         
         reactorVisibleArea->addWidget(0, 0, reactorCanvas_);
@@ -374,7 +375,13 @@ public:
         SDL_RenderFillRect(renderer, &full);
     }
 
-     void updateReactor(int deltaMS) {
+    void setReactorOnUpdate(std::function<void()> updateFunc) { reactorModel_->setOnUpdate(updateFunc); }
+
+    int getReactorCirclitCount() { return reactorModel_->getCirclitCount(); }
+    int getReactorQuadritCount() { return reactorModel_->getQuadritCount(); }
+    double getReactorSummaryEnergy() { return reactorModel_->getSummaryEnergy(); }
+
+    void updateReactor(int deltaMS) {
         static int passedDeltaMS = 0;
 
         passedDeltaMS += deltaMS;
@@ -385,6 +392,7 @@ public:
             passedDeltaMS -= reactorUpdateDelayMS_;
         }
     }
+    
     int reactorUpdateDelayMS() const { return reactorUpdateDelayMS_; }
 
 };

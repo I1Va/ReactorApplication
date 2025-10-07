@@ -7,10 +7,14 @@
 
 #include "MyGUI.h"
 
+const int RECORDER_BORDER_SIZE = 10;
+const int RECORDER_LINE_THICKNESS = 1;
+const int RECORDER_AXEMARK_THICKNESS = 2;
+const int RECORDER_DOT_SIZE = 1;
 
 struct CordPoint {
     double x, y;
-    int type;
+    int type;   
 };
 
 class PlotModel {
@@ -72,10 +76,24 @@ public:
 };
 
 class RecorderWidget : public Widget {
-    RecorderModel recorder;
+    RecorderModel recorder_;
+
+private:
+    void drawVerticalAxe(SDL_Renderer* renderer, double scaleY) {
+        assert(renderer);
+        
+        SDL_Rect rect = {0, 0, RECORDER_LINE_THICKNESS, rect_.h};
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); 
+        SDL_RenderFillRect(renderer, &rect);
+
+        // for (double y = rect_.h - scaleY; y >= 0; y -= scaleY) {
+        //     SDL_Rect mark = {0, (int) y, RECORDER_AXEMARK_THICKNESS * 2, RECORDER_AXEMARK_THICKNESS};
+        //     SDL_RenderFillRect(renderer, &mark);
+        // }
+    }
 
 public:
-    RecorderWidget(int width, int height, Widget *parent=nullptr): Widget(width, height, parent), recorder(width, height) {}
+    RecorderWidget(int width, int height, Widget *parent=nullptr): Widget(width, height, parent), recorder_(width, height) {}
 
     void renderSelfAction(SDL_Renderer* renderer) override {
         assert(renderer);
@@ -84,29 +102,20 @@ public:
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderFillRect(renderer, &widgetRect);
 
-        for (int i = 0; i < recorder.points().size(); i++) {
-            RecordPoint point = recorder.points()[i];
-            SDL_Color pointColor = Uint32ToSDL_Color(point.type);
+        drawVerticalAxe(renderer, recorder_.scaleY());
+
+        for (int i = 0; i < recorder_.points().size(); i++) {
+            RecordPoint point = recorder_.points()[i];
+            SDL_Color pointColor = Uint32ToSDL2gfxColor(point.type);
 
             SDL_SetRenderDrawColor(renderer, pointColor.r, pointColor.g, pointColor.b, pointColor.a);
-            SDL_RenderDrawPoint(renderer, i, point.y * recorder.scaleY());
+
+            filledCircleColor(renderer, i, point.y * recorder_.scaleY(), RECORDER_DOT_SIZE, SDL2gfxColorToUint32(BLACK_SDL_COLOR));
         }
     }
 
-    bool updateSelfAction() override {
-        static double x = 0; 
-        double y = std::sin(x+=0.1);
-
-        addPoint(y + 1, {0, 77, 77, 43});
-        endRecord();
-        setRerenderFlag();
-
-        return true; 
-    }
-
-
-    void addPoint(double y, SDL_Color color) { recorder.addPoint(y, SDLColorToUint32(color)); }
-    void endRecord() { recorder.endRecord(); }
+    void addPoint(double y, SDL_Color color) { recorder_.addPoint(y, SDL2gfxColorToUint32(color)); }
+    void endRecord() { recorder_.endRecord(); }
 };
 
 
