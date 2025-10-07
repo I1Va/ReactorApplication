@@ -107,10 +107,12 @@ public:
         for (int i = 0; i < recorder_.points().size(); i++) {
             RecordPoint point = recorder_.points()[i];
             SDL_Color pointColor = Uint32ToSDL2gfxColor(point.type);
+            
+            double x = i;
+            double y = -(point.y * recorder_.scaleY()) + rect_.h;
 
             SDL_SetRenderDrawColor(renderer, pointColor.r, pointColor.g, pointColor.b, pointColor.a);
-
-            filledCircleColor(renderer, i, point.y * recorder_.scaleY(), RECORDER_DOT_SIZE, SDL2gfxColorToUint32(BLACK_SDL_COLOR));
+            filledCircleColor(renderer, x, y, RECORDER_DOT_SIZE, point.type);
         }
     }
 

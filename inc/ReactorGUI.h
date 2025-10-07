@@ -280,12 +280,7 @@ public:
 };
 
 class ReactorGUI : public Window {
-    static constexpr const int BORDER_SIZE = 20;
-    static constexpr const int REACTOR_GUI_HEIGHT = 450;
-    static constexpr const int REACTOR_GUI_WIDTH = 350;
-
-    static constexpr const int REACTOR_CANVAS_HEIGHT = 300;
-    static constexpr const int REACTOR_CANVAS_WIDTH = REACTOR_GUI_WIDTH - 2 * BORDER_SIZE;
+    static constexpr const double REACTOR_CANVAS_SHARE = 0.75;
 
     static constexpr const char NARROW_RIGHTWALL[] = "images/NarrowRightWall.png";
     static constexpr const char NARROW_RIGHTWALL_PRESSED[] = "images/NarrowRightWallPressed.png";
@@ -298,6 +293,11 @@ class ReactorGUI : public Window {
     static constexpr const char ADD_QUADRIT[] = "images/addQuadritUnPressed.png";
     static constexpr const char REMOVE_MOLECULE[] = "images/removeMolecule.png";
     static constexpr const char REMOVE_MOLECULE_PRESSED[] = "images/removeMoleculePressed.png";
+
+    int reactorCanvasWidth_ = 0;
+    int reactorCanvasHeight_ = 0;
+    int buttonPanelWidth_ = 0;
+    int buttonPanelHeight_ = 0;
 
     int reactorUpdateDelayMS_;
 
@@ -346,25 +346,26 @@ private:
     }
 
 public:
-    ReactorGUI(std::function<void()> onReactorUpdate=nullptr, int reactorUpdateDelayMS=40): 
-        Window(REACTOR_GUI_WIDTH, REACTOR_GUI_HEIGHT),
+    ReactorGUI(int width, int height, std::function<void()> onReactorUpdate=nullptr, int reactorUpdateDelayMS=40): 
+        Window(width, height),
         reactorUpdateDelayMS_(reactorUpdateDelayMS)
     {
-        
-        ReactorVisibleArea *reactorVisibleArea = new ReactorVisibleArea(REACTOR_CANVAS_WIDTH, REACTOR_CANVAS_HEIGHT, this);
-        reactorCanvas_ = new ReactorCanvas(REACTOR_CANVAS_WIDTH, REACTOR_CANVAS_HEIGHT, onReactorUpdate, reactorVisibleArea);
+        reactorCanvasWidth_ = width - 2 * WINDOW_BORDER_SIZE;
+        reactorCanvasHeight_ = (height - 3 * WINDOW_BORDER_SIZE) * REACTOR_CANVAS_SHARE;
+        buttonPanelWidth_ = reactorCanvasWidth_;
+        buttonPanelHeight_ = height - 3 * WINDOW_BORDER_SIZE - reactorCanvasHeight_;
+    
+        ReactorVisibleArea *reactorVisibleArea = new ReactorVisibleArea(reactorCanvasWidth_, reactorCanvasHeight_, this);
+        reactorCanvas_ = new ReactorCanvas(reactorCanvasWidth_, reactorCanvasHeight_, onReactorUpdate, reactorVisibleArea);
         
         
         reactorVisibleArea->addWidget(0, 0, reactorCanvas_);
         reactorModel_ = reactorCanvas_->reactorModel();
 
+        Container *ButtonPanel = createReactorButtonPanel(buttonPanelWidth_, buttonPanelHeight_);
     
-        int buttonPanelWidth   = REACTOR_GUI_WIDTH - 2 * BORDER_SIZE;
-        int buttonPanelHeight  = REACTOR_GUI_HEIGHT - REACTOR_CANVAS_HEIGHT - 3 * BORDER_SIZE;
-        Container *ButtonPanel = createReactorButtonPanel(buttonPanelWidth, buttonPanelHeight);
-    
-        addWidget(BORDER_SIZE, BORDER_SIZE, reactorVisibleArea);
-        addWidget(BORDER_SIZE, BORDER_SIZE * 2 + REACTOR_CANVAS_HEIGHT, ButtonPanel);
+        addWidget(WINDOW_BORDER_SIZE, WINDOW_BORDER_SIZE, reactorVisibleArea);
+        addWidget(WINDOW_BORDER_SIZE, WINDOW_BORDER_SIZE * 2 + reactorCanvasHeight_, ButtonPanel);
     }
 
     void renderSelfAction(SDL_Renderer* renderer) override {

@@ -16,7 +16,11 @@ public:
         addWidget(WINDOW_BORDER_SIZE, WINDOW_BORDER_SIZE, recorder_);
     }
 
-    void addPoint(double y, SDL_Color color) { recorder_->addPoint(y, color); }
+    void addPoint(double y, SDL_Color color) { 
+        recorder_->addPoint(y, color); 
+        recorder_->setRerenderFlag();
+    }
+
     void endRecord() { recorder_->endRecord(); }
 };
 
@@ -26,29 +30,26 @@ int main() {
     Container *mainWindow = new Container(780, 580);
     application.setMainWidget(10, 10, mainWindow);    
 
-    RecorderWindow *moleculesRecorder = new RecorderWindow(300, 300, mainWindow);
-    mainWindow->addWidget(400, 0, moleculesRecorder);
+    RecorderWindow *moleculesRecorder = new RecorderWindow(245, 245, mainWindow);
+    mainWindow->addWidget(320, 10, moleculesRecorder);
 
-    RecorderWindow *energyRecorder = new RecorderWindow(300, 300, mainWindow);
-    mainWindow->addWidget(400, 300, energyRecorder);
+    RecorderWindow *energyRecorder = new RecorderWindow(245, 245, mainWindow);
+    mainWindow->addWidget(320, 265, energyRecorder);
 
 
-
-    ReactorGUI *reactorGUI = new ReactorGUI(nullptr, 40);
+    ReactorGUI *reactorGUI = new ReactorGUI(300, 500, nullptr, 40);
     reactorGUI->setReactorOnUpdate(
         [reactorGUI, moleculesRecorder, energyRecorder] {
             int reactorCirclitCount = reactorGUI->getReactorCirclitCount();
             int reactorQuadritCount = reactorGUI->getReactorQuadritCount();
             double reactorEnergy = reactorGUI->getReactorSummaryEnergy();
-            
+
             moleculesRecorder->addPoint(reactorCirclitCount, RED_SDL_COLOR);
             moleculesRecorder->addPoint(reactorQuadritCount, BLUE_SDL_COLOR);
             moleculesRecorder->endRecord();
-            moleculesRecorder->setRerenderFlag();
 
             energyRecorder->addPoint(reactorEnergy, ENERGY_COLOR);
             energyRecorder->endRecord();
-            energyRecorder->setRerenderFlag();
         }
     );
 
