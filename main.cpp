@@ -7,6 +7,12 @@
 
 const SDL_Color ENERGY_COLOR = {0, 200, 255, 255};
 
+const int APP_BORDER_SZ = 10;
+const gm_dot<int, 2> MAIN_WINDOW_SZ = {800, 600};
+const gm_dot<int, 2> REACTOR_GUI_SZ = {300, 500};
+const gm_dot<int, 2> PLOT_SZ = {(REACTOR_GUI_SZ.y - APP_BORDER_SZ) / 2, (REACTOR_GUI_SZ.y - APP_BORDER_SZ) / 2};
+
+
 class RecorderWindow : public Window {
     RecorderWidget *recorder_;
 
@@ -25,19 +31,18 @@ public:
 };
 
 int main() {
-    UIManager application(800, 600);
+    UIManager application(MAIN_WINDOW_SZ.x, MAIN_WINDOW_SZ.y);
 
-    Container *mainWindow = new Container(780, 580);
-    application.setMainWidget(10, 10, mainWindow);    
+    Container *mainWindow = new Container(MAIN_WINDOW_SZ.x - 2 * APP_BORDER_SZ, MAIN_WINDOW_SZ.y - 2 * APP_BORDER_SZ);
+    application.setMainWidget(APP_BORDER_SZ, APP_BORDER_SZ, mainWindow);    
 
-    RecorderWindow *moleculesRecorder = new RecorderWindow(245, 245, mainWindow);
-    mainWindow->addWidget(320, 10, moleculesRecorder);
+    RecorderWindow *moleculesRecorder = new RecorderWindow(PLOT_SZ.x, PLOT_SZ.y, mainWindow);
+    mainWindow->addWidget(REACTOR_GUI_SZ.x + 2 * APP_BORDER_SZ, APP_BORDER_SZ, moleculesRecorder);
 
-    RecorderWindow *energyRecorder = new RecorderWindow(245, 245, mainWindow);
-    mainWindow->addWidget(320, 265, energyRecorder);
+    RecorderWindow *energyRecorder = new RecorderWindow(PLOT_SZ.x, PLOT_SZ.y, mainWindow);
+    mainWindow->addWidget(REACTOR_GUI_SZ.x + 2 * APP_BORDER_SZ, PLOT_SZ.y + 2 * APP_BORDER_SZ, energyRecorder);
 
-
-    ReactorGUI *reactorGUI = new ReactorGUI(300, 500, nullptr, 40);
+    ReactorGUI *reactorGUI = new ReactorGUI(REACTOR_GUI_SZ.x, REACTOR_GUI_SZ.y, nullptr, 40);
     reactorGUI->setReactorOnUpdate(
         [reactorGUI, moleculesRecorder, energyRecorder] {
             int reactorCirclitCount = reactorGUI->getReactorCirclitCount();
@@ -54,15 +59,8 @@ int main() {
     );
 
 
-    mainWindow->addWidget(10, 10, reactorGUI);
+    mainWindow->addWidget(APP_BORDER_SZ, APP_BORDER_SZ, reactorGUI);
 
-   
-
-    // for (int i = 0; i < 100; i++) {
-    //     reactorGUI->addCirclit();
-    // }
-
-    
 
 
     application.addUserEvent([&reactorGUI](int deltaMS) { reactorGUI->updateReactor(deltaMS); });
