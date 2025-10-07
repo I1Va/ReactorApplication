@@ -4,6 +4,7 @@
 #include "ReactorModel.h"
 #include "ReactorGUI.h"
 #include "Plots.h"
+#include "ClockWidget.h"
 
 const SDL_Color ENERGY_COLOR = {0, 200, 255, 255};
 
@@ -11,6 +12,9 @@ const int APP_BORDER_SZ = 10;
 const gm_dot<int, 2> MAIN_WINDOW_SZ = {800, 600};
 const gm_dot<int, 2> REACTOR_GUI_SZ = {300, 500};
 const gm_dot<int, 2> PLOT_SZ = {(REACTOR_GUI_SZ.y - APP_BORDER_SZ) / 2, (REACTOR_GUI_SZ.y - APP_BORDER_SZ) / 2};
+const int CLOCK_WINDOW_LENGTH = 200;
+
+const char FONT_PATH[] = "fonts/Roboto/RobotoFont.ttf";
 
 
 class RecorderWindow : public Window {
@@ -57,12 +61,13 @@ int main() {
             energyRecorder->endRecord();
         }
     );
-
-
     mainWindow->addWidget(APP_BORDER_SZ, APP_BORDER_SZ, reactorGUI);
 
 
+    ClockWindow *clockWindow = new ClockWindow(CLOCK_WINDOW_LENGTH, FONT_PATH, mainWindow);
+    mainWindow->addWidget(3 * APP_BORDER_SZ + REACTOR_GUI_SZ.x + PLOT_SZ.x, APP_BORDER_SZ, clockWindow);
 
+  
     application.addUserEvent([&reactorGUI](int deltaMS) { reactorGUI->updateReactor(deltaMS); });
     
     application.run();
