@@ -19,8 +19,8 @@ target_include_directories(ReactorApplication
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc
 )
 
-# target_compile_options(ReactorApplication PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
-# target_link_options(ReactorApplication PRIVATE -fsanitize=address,undefined)
+target_compile_options(ReactorApplication PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
+target_link_options(ReactorApplication PRIVATE -fsanitize=address,undefined)
 
 target_include_directories(ReactorApplication PRIVATE ${SDL2_GFX_INCLUDE})
 target_link_libraries(ReactorApplication PRIVATE ${SDL2_GFX_LIB})
