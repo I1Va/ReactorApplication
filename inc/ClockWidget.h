@@ -160,7 +160,7 @@ public:
 
     void updateClock(double deltaMS) {
         currentTimeMS_ += deltaMS;
-        currentTimeMS_ = std::clamp(currentTimeMS_, 0, 60 * SEC_TO_MS);
+        if (currentTimeMS_ >= 60 * SEC_TO_MS) currentTimeMS_ = 0;
         setRerenderFlag();
     }
 };
