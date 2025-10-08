@@ -12,10 +12,6 @@ const double REACTOR_WALL_TEMPERATURE_COLOR_COEF = 1.0 / 400000;
 const double NARROWING_DELTA = 10;
 const int SEC_TO_MS = 1000;
 const int EXPLODE_PARTICLES_NUM = 100;
-struct buttonTexturePath {
-    const char *unpressed;
-    const char *pressed;
-};
 
 struct ReactorButtonTexturePack {
     

@@ -5,6 +5,7 @@
 #include "ReactorGUI.h"
 #include "Plots.h"
 #include "ClockWidget.h"
+#include "ScrollBar.h"
 
 const SDL_Color ENERGY_COLOR = {0, 200, 255, 255};
 
@@ -13,23 +14,24 @@ const gm_dot<int, 2> MAIN_WINDOW_SZ = {800, 600};
 const gm_dot<int, 2> REACTOR_GUI_SZ = {300, 500};
 const gm_dot<int, 2> PLOT_SZ = {(REACTOR_GUI_SZ.y - APP_BORDER_SZ) / 2, (REACTOR_GUI_SZ.y - APP_BORDER_SZ) / 2};
 const int CLOCK_WINDOW_LENGTH = 200;
+const gm_dot<int, 2> SCROLL_BAR_SZ = {100, 20};
 
 const char FONT_PATH[] = "fonts/Roboto/RobotoFont.ttf";
 
 const ReactorButtonTexturePack reactorButtonTexturePack = 
 {
-    .narrowRightWallBtnPath     = {"images/NarrowRightWall.png", "images/NarrowRightWallPressed.png"},
-    .unNarrowRightWallBtnPath   = {"images/UnNarrowRightWall.png", "images/addCirclitPressed.png"},
-    .addCirclitBtnPath          = {"images/addCirclitUnPressed.png", "images/addCirclitPressed.png"},
-    .addQuadritBtnPath          = {"images/addQuadritUnPressed.png", "images/addQuadritPressed.png"},
-    .removeMoleculeBtnPath      = {"images/removeMolecule.png", "images/removeMoleculePressed.png"},
+    .narrowRightWallBtnPath     = {"images/reactorButtonPanel/narrowRightWall/unpressed.png", "images/reactorButtonPanel/narrowRightWall/pressed.png"},
+    .unNarrowRightWallBtnPath   = {"images/reactorButtonPanel/unnarowRightWall/unpressed.png", "images/reactorButtonPanel/unnarowRightWall/pressed.png"},
+    .addCirclitBtnPath          = {"images/reactorButtonPanel/addCirclit/unpressed.png", "images/reactorButtonPanel/addCirclit/pressed.png"},
+    .addQuadritBtnPath          = {"images/reactorButtonPanel/addQuadrit/unpressed.png", "images/reactorButtonPanel/addQuadrit/pressed.png"},
+    .removeMoleculeBtnPath      = {"images/reactorButtonPanel/removeMolecule/unpressed.png", "images/reactorButtonPanel/removeMolecule/pressed.png"},
 
-    .heatTopWallBtnPath         = {"images/heatTopWall.png", "images/heatTopWallPressed.png"},
-    .heatBottomWallBtnPath      = {"images/heatBottomWall.png", "images/heatBottomWallPressed.png"},
-    .heatLeftWallBtnPath        = {"images/heatLeftWall.png", "images/heatLeftWallPressed.png"},
-    .heatRightWallBtnPath       = {"images/heatRightWall.png", "images/heatRightWallPressed.png"},
+    .heatTopWallBtnPath         = {"images/reactorButtonPanel/heatTopWall/unpressed.png", "images/reactorButtonPanel/heatTopWall/pressed.png"},
+    .heatBottomWallBtnPath      = {"images/reactorButtonPanel/heatBottomWall/unpressed.png", "images/reactorButtonPanel/heatBottomWall/pressed.png"},
+    .heatLeftWallBtnPath        = {"images/reactorButtonPanel/heatLeftWall/unpressed.png", "images/reactorButtonPanel/heatLeftWall/pressed.png"},
+    .heatRightWallBtnPath       = {"images/reactorButtonPanel/hearRightWall/unpressed.png", "images/reactorButtonPanel/hearRightWall/pressed.png"},
 
-    .explodeReactorBtnPath      = {"images/explodeReactor.png", "images/explodeReactorPressed.png"}
+    .explodeReactorBtnPath      = {"images/reactorButtonPanel/explode/unpressed.png", "images/reactorButtonPanel/explode/pressed.png"}
 };
 
 int main() {
@@ -66,6 +68,12 @@ int main() {
     mainWindow->addWidget(3 * APP_BORDER_SZ + REACTOR_GUI_SZ.x + PLOT_SZ.x, APP_BORDER_SZ, clockWindow);
 
   
+    ScrollBar *scrollBar = new ScrollBar(SCROLL_BAR_SZ.x, SCROLL_BAR_SZ.y, nullptr, true, mainWindow);
+    mainWindow->addWidget(600, 500, scrollBar);
+
+
+
+    
     application.addUserEvent([reactorGUI, clockWindow](int deltaMS) { 
         reactorGUI->updateReactor(deltaMS); 
         clockWindow->updateClock(deltaMS);
