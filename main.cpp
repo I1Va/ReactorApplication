@@ -15,6 +15,8 @@ const gm_dot<int, 2> REACTOR_GUI_SZ = {300, 500};
 const gm_dot<int, 2> PLOT_SZ = {(REACTOR_GUI_SZ.y - APP_BORDER_SZ) / 2, (REACTOR_GUI_SZ.y - APP_BORDER_SZ) / 2};
 const int CLOCK_WINDOW_LENGTH = 200;
 const gm_dot<int, 2> SCROLL_BAR_SZ = {200, 40};
+const double MOLECULE_RECORDER_START_SCALE = 30;
+const double START_ENERGY_YSCALE = 1.0 / 100000;
 
 const char FONT_PATH[] = "fonts/Roboto/RobotoFont.ttf";
 
@@ -40,10 +42,10 @@ int main() {
     Container *mainWindow = new Container(MAIN_WINDOW_SZ.x - 2 * APP_BORDER_SZ, MAIN_WINDOW_SZ.y - 2 * APP_BORDER_SZ);
     application.setMainWidget(APP_BORDER_SZ, APP_BORDER_SZ, mainWindow);    
 
-    RecorderWindow *moleculesRecorder = new RecorderWindow(PLOT_SZ.x, PLOT_SZ.y, mainWindow);
+    ScrollRecorderWindow *moleculesRecorder = new ScrollRecorderWindow(PLOT_SZ.x, PLOT_SZ.y, MOLECULE_RECORDER_START_SCALE, false, mainWindow);
     mainWindow->addWidget(REACTOR_GUI_SZ.x + 2 * APP_BORDER_SZ, APP_BORDER_SZ, moleculesRecorder);
 
-    RecorderWindow *energyRecorder = new RecorderWindow(PLOT_SZ.x, PLOT_SZ.y, mainWindow);
+    RecorderWindow *energyRecorder = new RecorderWindow(PLOT_SZ.x, PLOT_SZ.y, START_ENERGY_YSCALE, true, mainWindow);
     mainWindow->addWidget(REACTOR_GUI_SZ.x + 2 * APP_BORDER_SZ, PLOT_SZ.y + 2 * APP_BORDER_SZ, energyRecorder);
 
     ReactorGUI *reactorGUI = new ReactorGUI(REACTOR_GUI_SZ.x, REACTOR_GUI_SZ.y, reactorButtonTexturePack, nullptr, 40);
@@ -66,12 +68,6 @@ int main() {
 
     ClockWindow *clockWindow = new ClockWindow(CLOCK_WINDOW_LENGTH, FONT_PATH, mainWindow);
     mainWindow->addWidget(3 * APP_BORDER_SZ + REACTOR_GUI_SZ.x + PLOT_SZ.x, APP_BORDER_SZ, clockWindow);
-
-  
-    ScrollBar *scrollBar = new ScrollBar(SCROLL_BAR_SZ.x, SCROLL_BAR_SZ.y, nullptr, true, mainWindow);
-    mainWindow->addWidget(500, 500, scrollBar);
-
-
 
     
     application.addUserEvent([reactorGUI, clockWindow](int deltaMS) { 

@@ -59,8 +59,7 @@ public:
     }
 };
 
-
-class ScrollBar : public Window {
+class ScrollBar : public Container {
     static constexpr double BUTTON_LAYOUT_SHARE_ = 0.1; 
     static constexpr double THUMB_MOVING_DELTA = 0.05;
 
@@ -91,7 +90,7 @@ private:
     void move(double deltaPercent) {
         const double newPercentage = std::clamp(percentage_ + deltaPercent, 0.0, 1.0);
         const double realDelta = newPercentage - percentage_;
-        
+
         if (onScroll_) onScroll_(newPercentage);
 
         gm_dot<int, 2> thumbPos = getThumbPos(percentage_);
@@ -99,8 +98,6 @@ private:
         int relX = (isHorizontal_ ? realDelta : 0) * (rect_.w - 3 * buttonSize_.x);
         int relY = (!isHorizontal_ ? realDelta : 0) * (rect_.h - 3 * buttonSize_.y);
 
-
-        std::cout << "move : " << relX << "\n";
         thumbButton_->setPosition(thumbPos.x + relX, thumbPos.y + relY);
         thumbButton_->clampPos();
 
@@ -115,7 +112,7 @@ private:
 
 public:
     ScrollBar(int width,  int height, std::function<void(double)> onScroll, bool isHorizontal = true, Widget *parent=nullptr): 
-        Window(width, height, parent), isHorizontal_(isHorizontal) 
+        Container(width, height, parent), isHorizontal_(isHorizontal), onScroll_(onScroll)
     {
         buttonSize_ = 
         {
@@ -125,11 +122,11 @@ public:
 
         topButton_ = new Button(buttonSize_.x, buttonSize_.y, scrollBarTopBtnPath.unpressed, scrollBarTopBtnPath.pressed, 
             [this] { move(THUMB_MOVING_DELTA); }, this);
-        addWidget(( isHorizontal ? rect_.w - buttonSize_.x : 0), 0, topButton_);
+        addWidget(( isHorizontal ? rect_.w - buttonSize_.x : 0), (!isHorizontal ? rect_.h - buttonSize_.y : 0), topButton_);
 
         bottomButton_ = new Button(buttonSize_.x, buttonSize_.y, scrollBarBottomBtnPath.unpressed, scrollBarBottomBtnPath.pressed, 
             [this] { move(-THUMB_MOVING_DELTA); }, this);
-        addWidget(0, (!isHorizontal ? rect_.h - buttonSize_.y: 0), bottomButton_);
+        addWidget(0, 0, bottomButton_);
 
         thumbMovingArea_.x = (isHorizontal ? buttonSize_.x : 0);
         thumbMovingArea_.y = (!isHorizontal ? buttonSize_.y : 0);
@@ -145,19 +142,10 @@ public:
     bool updateSelfAction() override {
         bool updated = false;
 
-        if (replaced_) {
-            rect_.x += accumulatedRel_.x;
-            rect_.y += accumulatedRel_.y;
-            accumulatedRel_ = {0, 0};
-            replaced_ = false;
-            if (parent_) parent_->invalidate();
-            updated = true;
-        }
-
         int dx = thumbButton_->rect().x - startThumbPos_.x;
         int dy = thumbButton_->rect().y - startThumbPos_.y;
         double newPercentage = getPercentFromRelativePos(dx, dy);
-        
+
         if (newPercentage != percentage_) {
             percentage_ = newPercentage;
             setRerenderFlag();
@@ -166,6 +154,14 @@ public:
         }
     
         return updated;
+    }
+
+    void renderSelfAction(SDL_Renderer* renderer) override {
+        assert(renderer);
+
+        SDL_Rect widgetRect = {0, 0, rect_.w, rect_.h};
+        SDL_SetRenderDrawColor(renderer, DEFAULT_WINDOW_COLOR.r, DEFAULT_WINDOW_COLOR.g, DEFAULT_WINDOW_COLOR.b, DEFAULT_WINDOW_COLOR.a);
+        SDL_RenderFillRect(renderer, &widgetRect);
     }
 
     bool onMouseDownSelfAction(const MouseButtonEvent &event) override {
