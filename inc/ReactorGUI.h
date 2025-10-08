@@ -15,18 +15,18 @@ const int EXPLODE_PARTICLES_NUM = 100;
 
 struct ReactorButtonTexturePack {
     
-    buttonTexturePath narrowRightWallBtnPath;
-    buttonTexturePath unNarrowRightWallBtnPath;
-    buttonTexturePath addCirclitBtnPath;
-    buttonTexturePath addQuadritBtnPath;
-    buttonTexturePath removeMoleculeBtnPath;
+    ButtonTexturePath narrowRightWallBtnPath;
+    ButtonTexturePath unNarrowRightWallBtnPath;
+    ButtonTexturePath addCirclitBtnPath;
+    ButtonTexturePath addQuadritBtnPath;
+    ButtonTexturePath removeMoleculeBtnPath;
 
-    buttonTexturePath heatTopWallBtnPath; 
-    buttonTexturePath heatBottomWallBtnPath;  
-    buttonTexturePath heatLeftWallBtnPath;
-    buttonTexturePath heatRightWallBtnPath;
+    ButtonTexturePath heatTopWallBtnPath; 
+    ButtonTexturePath heatBottomWallBtnPath;  
+    ButtonTexturePath heatLeftWallBtnPath;
+    ButtonTexturePath heatRightWallBtnPath;
 
-    buttonTexturePath explodeReactorBtnPath;
+    ButtonTexturePath explodeReactorBtnPath;
 };
 
 class MGShape {

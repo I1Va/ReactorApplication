@@ -14,7 +14,7 @@ const gm_dot<int, 2> MAIN_WINDOW_SZ = {800, 600};
 const gm_dot<int, 2> REACTOR_GUI_SZ = {300, 500};
 const gm_dot<int, 2> PLOT_SZ = {(REACTOR_GUI_SZ.y - APP_BORDER_SZ) / 2, (REACTOR_GUI_SZ.y - APP_BORDER_SZ) / 2};
 const int CLOCK_WINDOW_LENGTH = 200;
-const gm_dot<int, 2> SCROLL_BAR_SZ = {100, 20};
+const gm_dot<int, 2> SCROLL_BAR_SZ = {200, 40};
 
 const char FONT_PATH[] = "fonts/Roboto/RobotoFont.ttf";
 
@@ -69,7 +69,7 @@ int main() {
 
   
     ScrollBar *scrollBar = new ScrollBar(SCROLL_BAR_SZ.x, SCROLL_BAR_SZ.y, nullptr, true, mainWindow);
-    mainWindow->addWidget(600, 500, scrollBar);
+    mainWindow->addWidget(500, 500, scrollBar);
 
 
 
